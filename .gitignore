@@ -1,0 +1,13 @@
+# Geheime configuratie — NOOIT committen
+config.php
+
+# Deploy-zip
+rachelle-mp-tracker.zip
+
+# OS / editor / tooling
+.DS_Store
+Thumbs.db
+*.log
+.vscode/
+.idea/
+.claude/
