@@ -2,1155 +2,366 @@
 <html lang="nl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#ef5b46">
 <title>Marktplaats Tracker</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-
-  :root {
-    --bg: #f5f0e8;
-    --card: #fffdf7;
-    --accent: #c84b2f;
-    --accent2: #e8a020;
-    --text: #1a1410;
-    --muted: #8a7f72;
-    --border: #ddd5c5;
-    --green: #2d7a4f;
-    --red: #c84b2f;
-  }
-
-  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
-  body {
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    min-height: 100vh;
-    padding-bottom: 80px;
-  }
-
-  header {
-    background: var(--accent);
-    color: white;
-    padding: 20px 20px 16px;
-    position: sticky;
-    top: 0;
-    z-index: 100;
-  }
-
-  header h1 {
-    font-family: 'Fraunces', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-
-  header p {
-    font-size: 0.78rem;
-    opacity: 0.85;
-    margin-top: 2px;
-  }
-
-  .tabs {
-    display: flex;
-    background: var(--text);
-  }
-
-  .tab {
-    flex: 1;
-    padding: 12px;
-    text-align: center;
-    font-size: 0.82rem;
-    font-weight: 500;
-    color: #aaa;
-    cursor: pointer;
-    border: none;
-    background: none;
-    letter-spacing: 0.3px;
-    transition: color 0.2s;
-  }
-
-  .tab.active {
-    color: var(--accent2);
-    border-bottom: 2px solid var(--accent2);
-  }
-
-  .view { display: none; padding: 16px; }
-  .view.active { display: block; }
-
-  /* FORM */
-  .form-section {
-    background: var(--card);
-    border-radius: 12px;
-    padding: 20px;
-    margin-bottom: 14px;
-    border: 1px solid var(--border);
-  }
-
-  .form-section-title {
-    font-family: 'Fraunces', serif;
-    font-size: 0.9rem;
-    font-weight: 700;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    margin-bottom: 14px;
-  }
-
-  label {
-    display: block;
-    font-size: 0.78rem;
-    font-weight: 500;
-    color: var(--muted);
-    margin-bottom: 5px;
-    margin-top: 12px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-  }
-
-  label:first-of-type { margin-top: 0; }
-
-  input, select, textarea {
-    width: 100%;
-    padding: 12px 14px;
-    border: 1.5px solid var(--border);
-    border-radius: 8px;
-    font-size: 1rem;
-    font-family: 'DM Sans', sans-serif;
-    background: var(--bg);
-    color: var(--text);
-    appearance: none;
-    -webkit-appearance: none;
-    transition: border-color 0.2s;
-  }
-
-  input:focus, select:focus, textarea:focus {
-    outline: none;
-    border-color: var(--accent);
-    background: white;
-  }
-
-  textarea { resize: none; height: 80px; }
-
-  .price-row {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-  }
-
-  .profit-preview {
-    background: linear-gradient(135deg, #f0f7f3, #e8f5ed);
-    border: 1.5px solid #b8dfc8;
-    border-radius: 8px;
-    padding: 12px 16px;
-    margin-top: 14px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-  }
-
-  .profit-preview .label {
-    font-size: 0.78rem;
-    color: var(--green);
-    font-weight: 500;
-  }
-
-  .profit-preview .amount {
-    font-family: 'Fraunces', serif;
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--green);
-  }
-
-  .profit-preview.loss { 
-    background: linear-gradient(135deg, #fdf2f0, #fbe8e5);
-    border-color: #f0c0b8;
-  }
-  .profit-preview.loss .label,
-  .profit-preview.loss .amount { color: var(--red); }
-
-  .btn-primary {
-    width: 100%;
-    padding: 16px;
-    background: var(--accent);
-    color: white;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-    font-weight: 500;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    letter-spacing: 0.2px;
-    transition: opacity 0.2s, transform 0.1s;
-    margin-top: 6px;
-  }
-
-  .btn-primary:active { transform: scale(0.98); opacity: 0.9; }
-
-  /* STATS */
-  .stats-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 10px;
-    margin-bottom: 14px;
-  }
-
-  .stat-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-  }
-
-  .stat-card.full { grid-column: 1 / -1; }
-
-  .stat-card .stat-label {
-    font-size: 0.72rem;
-    color: var(--muted);
-    text-transform: uppercase;
-    letter-spacing: 0.8px;
-    font-weight: 500;
-  }
-
-  .stat-card .stat-value {
-    font-family: 'Fraunces', serif;
-    font-size: 1.6rem;
-    font-weight: 700;
-    margin-top: 4px;
-    color: var(--text);
-  }
-
-  .stat-card .stat-value.positive { color: var(--green); }
-  .stat-card .stat-value.negative { color: var(--red); }
-
-  /* LIST */
-  .filter-bar {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
-    overflow-x: auto;
-    padding-bottom: 4px;
-  }
-
-  .filter-btn {
-    padding: 7px 14px;
-    border-radius: 20px;
-    border: 1.5px solid var(--border);
-    background: var(--card);
-    font-size: 0.78rem;
-    font-family: 'DM Sans', sans-serif;
-    white-space: nowrap;
-    cursor: pointer;
-    color: var(--muted);
-    transition: all 0.2s;
-  }
-
-  .filter-btn.active {
-    background: var(--text);
-    color: white;
-    border-color: var(--text);
-  }
-
-  .item-card {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 10px;
-    position: relative;
-    overflow: hidden;
-  }
-
-  .item-card::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 0; bottom: 0;
-    width: 4px;
-    background: var(--border);
-  }
-
-  .item-card.verkocht::before { background: var(--green); }
-  .item-card.te-koop::before { background: var(--accent2); }
-  .item-card.gereserveerd::before { background: #7a5fc8; }
-
-  .item-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: flex-start;
-    margin-bottom: 8px;
-  }
-
-  .item-name {
-    font-family: 'Fraunces', serif;
-    font-weight: 700;
-    font-size: 1.05rem;
-    flex: 1;
-  }
-
-  .status-badge {
-    font-size: 0.68rem;
-    font-weight: 500;
-    padding: 3px 8px;
-    border-radius: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    margin-left: 8px;
-    white-space: nowrap;
-  }
-
-  .badge-verkocht { background: #d4f0e2; color: var(--green); }
-  .badge-te-koop { background: #fef3d8; color: #b07010; }
-  .badge-gereserveerd { background: #ede8f8; color: #5a3ca8; }
-  .badge-geen { background: #eee; color: #888; }
-
-  .item-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    font-size: 0.82rem;
-    color: var(--muted);
-    margin-bottom: 8px;
-  }
-
-  .item-prices {
-    display: flex;
-    gap: 16px;
-    align-items: center;
-  }
-
-  .price-in, .price-out {
-    font-size: 0.82rem;
-  }
-
-  .price-in span, .price-out span {
-    font-family: 'Fraunces', serif;
-    font-size: 1rem;
-    font-weight: 700;
-  }
-
-  .price-in span { color: var(--red); }
-  .price-out span { color: var(--green); }
-
-  .item-winst {
-    font-size: 0.78rem;
-    font-weight: 500;
-    padding: 2px 8px;
-    border-radius: 6px;
-    margin-left: auto;
-  }
-
-  .winst-pos { background: #d4f0e2; color: var(--green); }
-  .winst-neg { background: #fde8e5; color: var(--red); }
-
-  .item-note {
-    font-size: 0.8rem;
-    color: var(--muted);
-    font-style: italic;
-    margin-top: 6px;
-    border-top: 1px solid var(--border);
-    padding-top: 6px;
-  }
-
-  .item-actions {
-    display: flex;
-    gap: 8px;
-    margin-top: 10px;
-  }
-
-  .btn-action {
-    flex: 1;
-    padding: 8px;
-    border-radius: 7px;
-    border: 1.5px solid var(--border);
-    background: transparent;
-    font-size: 0.8rem;
-    font-family: 'DM Sans', sans-serif;
-    cursor: pointer;
-    color: var(--text);
-    transition: all 0.15s;
-  }
-
-  .btn-action:active { opacity: 0.7; }
-  .btn-action.del { color: var(--red); border-color: #f0c0b8; }
-
-  .export-bar {
-    background: var(--card);
-    border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 16px;
-    margin-bottom: 14px;
-    display: flex;
-    gap: 10px;
-    align-items: center;
-  }
-
-  .btn-export {
-    flex: 1;
-    padding: 12px;
-    border-radius: 8px;
-    border: none;
-    font-size: 0.85rem;
-    font-family: 'DM Sans', sans-serif;
-    font-weight: 500;
-    cursor: pointer;
-    transition: opacity 0.2s;
-  }
-
-  .btn-export:active { opacity: 0.8; }
-  .btn-csv { background: var(--text); color: white; }
-  .btn-clear { background: #fde8e5; color: var(--red); }
-
-  .empty-state {
-    text-align: center;
-    padding: 40px 20px;
-    color: var(--muted);
-  }
-
-  .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
-  .empty-state p { font-size: 0.9rem; }
-
-  .toast {
-    position: fixed;
-    bottom: 90px;
-    left: 50%;
-    transform: translateX(-50%) translateY(20px);
-    background: var(--text);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
-    font-size: 0.85rem;
-    z-index: 999;
-    opacity: 0;
-    transition: all 0.3s;
-    pointer-events: none;
-    white-space: nowrap;
-  }
-
-  .toast.show {
-    opacity: 1;
-    transform: translateX(-50%) translateY(0);
-  }
-
-  .accordion-row {
-    border-bottom: 1px solid var(--border);
-  }
-
-  .accordion-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 0;
-    cursor: pointer;
-    user-select: none;
-    -webkit-user-select: none;
-  }
-
-  .accordion-header:active { opacity: 0.7; }
-
-  .accordion-arrow {
-    font-size: 0.7rem;
-    color: var(--muted);
-    transition: transform 0.2s;
-    margin-left: 6px;
-  }
-
-  .accordion-arrow.open { transform: rotate(90deg); }
-
-  .accordion-body {
-    display: none;
-    padding-bottom: 6px;
-  }
-
-  .accordion-body.open { display: block; }
-
-  .cat-row {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 7px 0 7px 12px;
-    border-bottom: 1px solid var(--border);
-    cursor: pointer;
-    -webkit-user-select: none;
-  }
-
-  .cat-row:last-child { border-bottom: none; }
-  .cat-row:active { opacity: 0.7; }
-
-  .product-list {
-    display: none;
-    padding-left: 24px;
-    padding-bottom: 4px;
-  }
-
-  .product-list.open { display: block; }
-
-  .product-item {
-    display: flex;
-    justify-content: space-between;
-    padding: 4px 0;
-    font-size: 0.8rem;
-    color: var(--muted);
-    border-bottom: 1px dotted var(--border);
-  }
-
-  .product-item:last-child { border-bottom: none; }
-
-  /* edit modal */
-  .modal-overlay {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0,0,0,0.5);
-    z-index: 200;
-    align-items: flex-end;
-  }
-
-  .modal-overlay.open { display: flex; }
-
-  .modal {
-    background: var(--bg);
-    width: 100%;
-    border-radius: 20px 20px 0 0;
-    padding: 20px;
-    max-height: 90vh;
-    overflow-y: auto;
-  }
-
-  .modal-handle {
-    width: 36px;
-    height: 4px;
-    background: var(--border);
-    border-radius: 2px;
-    margin: 0 auto 16px;
-  }
-
-  .modal-title {
-    font-family: 'Fraunces', serif;
-    font-size: 1.2rem;
-    font-weight: 700;
-    margin-bottom: 16px;
-  }
-</style>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
-<header>
-  <h1>🛍 Marktplaats Tracker</h1>
-  <p>Bijhouden wat je verkoopt & verdient</p>
-</header>
-
-<div class="tabs">
-  <button class="tab active" onclick="switchTab('invoer', this)">➕ Invoer</button>
-  <button class="tab" onclick="switchTab('overzicht', this)">📋 Overzicht</button>
-  <button class="tab" onclick="switchTab('stats', this)">📊 Statistieken</button>
+<!-- ============ LOGIN ============ -->
+<div class="login" id="login">
+  <form class="login-card" id="login-form" autocomplete="off">
+    <div class="logo">🛒</div>
+    <h1>Marktplaats Tracker</h1>
+    <p>Log in om je voorraad en winst te beheren.</p>
+    <div class="field">
+      <label for="pw">Wachtwoord</label>
+      <input type="password" id="pw" placeholder="••••••••" autocomplete="current-password">
+    </div>
+    <div class="login-err" id="login-err"></div>
+    <button type="submit" class="btn btn-primary" id="login-btn">Inloggen</button>
+  </form>
 </div>
 
-<!-- INVOER -->
-<div class="view active" id="view-invoer">
+<!-- ============ APP ============ -->
+<div class="app hidden" id="app">
 
-  <div class="form-section">
-    <div class="form-section-title">📦 Artikel</div>
-    <label>Naam artikel</label>
-    <input type="text" id="naam" placeholder="bijv. Vintage vaas, jeansjasje…" autocomplete="off">
-
-    <label>Categorie</label>
-    <select id="categorie">
-      <option value="">— kies categorie —</option>
-      <option>Kleding</option>
-      <option>Meubels</option>
-      <option>Decoratie</option>
-      <option>Keuken</option>
-      <option>Speelgoed</option>
-      <option>Elektronica</option>
-      <option>Boeken</option>
-      <option>Sieraden / Accessoires</option>
-      <option>Kunst</option>
-      <option>Overig</option>
-    </select>
-
-    <label>Waar gekocht</label>
-    <input type="text" id="winkel" placeholder="bijv. Kringloop Utrecht" autocomplete="off">
-
-    <label>Datum aankoop</label>
-    <input type="date" id="datum-inkoop">
-  </div>
-
-  <div class="form-section">
-    <div class="form-section-title">💰 Prijzen</div>
-    <div class="price-row">
+  <div class="topbar">
+    <div class="brand">
+      <div class="logo">🛒</div>
       <div>
-        <label>Inkoopprijs €</label>
-        <input type="number" id="prijs-in" placeholder="0,00" step="0.01" min="0" oninput="updateProfit()">
-      </div>
-      <div>
-        <label>Verkoopprijs €</label>
-        <input type="number" id="prijs-uit" placeholder="0,00" step="0.01" min="0" oninput="updateProfit()">
+        <h1>Marktplaats Tracker</h1>
+        <p id="tagline">Je voorraad &amp; winst in één oogopslag</p>
       </div>
     </div>
-    <div class="profit-preview" id="profit-preview" style="display:none">
-      <span class="label" id="profit-label">Winst</span>
-      <span class="amount" id="profit-amount">€ 0,00</span>
-    </div>
+    <button class="icon-btn" id="theme-btn" title="Donker/licht">🌙</button>
+    <button class="icon-btn" id="settings-btn" title="Instellingen">⚙️</button>
   </div>
 
-  <div class="form-section">
-    <div class="form-section-title">📌 Status</div>
-    <label>Status</label>
-    <select id="status">
-      <option value="te-koop">Te koop</option>
-      <option value="gereserveerd">Gereserveerd</option>
-      <option value="verkocht">Verkocht</option>
-    </select>
+  <main>
+    <!-- ---------- TOEVOEGEN ---------- -->
+    <section class="view active" id="view-add">
+      <div class="card pad">
+        <div class="field">
+          <label for="naam">Artikel *</label>
+          <input type="text" id="naam" placeholder="bijv. Vintage vaas, jeansjasje…" autocomplete="off">
+        </div>
+        <div class="field">
+          <label for="categorie">Categorie</label>
+          <select id="categorie"></select>
+        </div>
+        <div class="field">
+          <label for="winkel">Waar gekocht</label>
+          <input type="text" id="winkel" placeholder="bijv. Kringloop Utrecht" autocomplete="off">
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="prijs-in">Inkoopprijs</label>
+            <div class="input-prefix"><span>€</span>
+              <input type="number" id="prijs-in" placeholder="0,00" step="0.01" min="0" inputmode="decimal">
+            </div>
+          </div>
+          <div class="field">
+            <label for="prijs-uit">Verkoopprijs</label>
+            <div class="input-prefix"><span>€</span>
+              <input type="number" id="prijs-uit" placeholder="0,00" step="0.01" min="0" inputmode="decimal">
+            </div>
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field">
+            <label for="datum-inkoop">Datum inkoop</label>
+            <input type="date" id="datum-inkoop">
+          </div>
+          <div class="field">
+            <label for="status">Status</label>
+            <select id="status">
+              <option value="te-koop">Te koop</option>
+              <option value="gereserveerd">Gereserveerd</option>
+              <option value="verkocht">Verkocht</option>
+            </select>
+          </div>
+        </div>
+        <div class="field" id="verkoop-datum-wrap">
+          <label for="datum-verkoop">Datum verkoop</label>
+          <input type="date" id="datum-verkoop">
+        </div>
+        <div class="field">
+          <label for="notitie">Notitie</label>
+          <textarea id="notitie" placeholder="Bijzonderheden, conditie, afspraken…"></textarea>
+        </div>
+        <div class="field">
+          <label for="link">Advertentielink (Marktplaats)</label>
+          <input type="url" id="link" placeholder="https://www.marktplaats.nl/v/…" autocomplete="off" inputmode="url">
+        </div>
 
-    <label>Datum verkoop (optioneel)</label>
-    <input type="date" id="datum-verkoop">
+        <div class="profit" id="profit">
+          <span class="lbl" id="profit-lbl">Winst</span>
+          <span class="amt tnum" id="profit-amt">€ 0,00</span>
+        </div>
 
-    <label>Notitie (optioneel)</label>
-    <textarea id="notitie" placeholder="Bijzonderheden, conditie, afspraken…"></textarea>
-  </div>
+        <button class="btn btn-primary" id="save-btn" style="margin-top:18px">Opslaan</button>
+      </div>
+    </section>
 
-  <button class="btn-primary" onclick="saveItem()">Opslaan</button>
+    <!-- ---------- OVERZICHT ---------- -->
+    <section class="view" id="view-list">
+      <div class="searchbar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="search" placeholder="Zoek op naam, categorie of winkel…" autocomplete="off">
+        <button type="button" class="search-clear hidden" id="search-clear" aria-label="Wissen">✕</button>
+      </div>
+      <div class="filters" id="filters">
+        <button class="chip active" data-f="alle">Alle</button>
+        <button class="chip" data-f="te-koop">Te koop</button>
+        <button class="chip" data-f="gereserveerd">Gereserveerd</button>
+        <button class="chip" data-f="verkocht">Verkocht</button>
+      </div>
+      <div class="list-tools">
+        <select id="sort" aria-label="Sorteren">
+          <option value="nieuw">Nieuwste eerst</option>
+          <option value="oud">Oudste eerst</option>
+          <option value="prijs-hoog">Prijs hoog → laag</option>
+          <option value="prijs-laag">Prijs laag → hoog</option>
+          <option value="winst">Winst hoog → laag</option>
+          <option value="langst">Langst te koop</option>
+        </select>
+        <select id="cat-filter" aria-label="Categorie"></select>
+      </div>
+      <div class="list-meta" id="list-count"></div>
+      <div id="items-list"></div>
+    </section>
+
+    <!-- ---------- STATISTIEKEN ---------- -->
+    <section class="view" id="view-stats">
+      <div class="goalbar-wrap hidden" id="goalbar-wrap">
+        <div class="goalbar-top">
+          <span><i>🎯</i> <span id="goal-label"></span></span>
+          <span class="goal-sub" id="goal-sub"></span>
+        </div>
+        <div class="goalbar"><div class="goalbar-fill" id="goalbar-fill"></div></div>
+      </div>
+      <div class="stat hero" style="margin-bottom:12px">
+        <div class="k">💰 Totale winst</div>
+        <div class="v tnum" id="s-winst">€ 0,00</div>
+        <div class="sub" id="s-winst-sub">van verkochte artikelen</div>
+      </div>
+      <div class="stats-grid" style="margin-bottom:14px">
+        <div class="stat"><div class="k">📦 Artikelen</div><div class="v tnum" id="s-totaal">0</div></div>
+        <div class="stat"><div class="k">✅ Verkocht</div><div class="v tnum" id="s-verkocht">0</div></div>
+        <div class="stat"><div class="k">🛍️ Totale inkoop</div><div class="v tnum" id="s-inkoop">€ 0,00</div></div>
+        <div class="stat"><div class="k">📈 Omzet</div><div class="v tnum" id="s-omzet">€ 0,00</div></div>
+        <div class="stat"><div class="k">🧮 Gem. verkoopprijs</div><div class="v tnum" id="s-gem-prijs">€ 0,00</div></div>
+        <div class="stat"><div class="k">💸 Gem. winst</div><div class="v tnum" id="s-gem-marge">€ 0,00</div></div>
+        <div class="stat"><div class="k">⏱️ Gem. doorlooptijd</div><div class="v tnum" id="s-doorlooptijd">n.v.t.</div></div>
+        <div class="stat"><div class="k">⏳ Lang te koop</div><div class="v tnum" id="s-stale">0</div></div>
+        <div class="stat"><div class="k">🏆 Beste categorie</div><div class="v" id="s-beste-cat" style="font-size:1.1rem">—</div><div class="sub" id="s-beste-cat-sub" style="color:var(--muted);font-size:0.75rem"></div></div>
+        <div class="stat span"><div class="k">🏷️ Voorraadwaarde (inkoop, nog niet verkocht)</div><div class="v tnum" id="s-voorraad">€ 0,00</div></div>
+        <div class="stat span"><div class="k">🛒 Aanbodwaarde (vraagprijs, nu te koop)</div><div class="v tnum" id="s-aanbod">€ 0,00</div></div>
+      </div>
+
+      <div class="section-title">Per jaar</div>
+      <div class="card pad" style="padding:6px 18px;margin-bottom:16px"><div id="per-jaar"></div></div>
+
+      <div class="section-title">Per maand</div>
+      <div class="card pad" style="padding:6px 18px;margin-bottom:16px"><div id="per-maand"></div></div>
+
+      <div class="section-title">Per categorie</div>
+      <div class="card pad" style="padding:6px 18px"><div id="per-categorie"></div></div>
+    </section>
+  </main>
+
+  <!-- ---------- BOTTOM NAV ---------- -->
+  <nav class="nav">
+    <button class="nav-btn active" data-view="list" id="nav-list">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+      Overzicht
+    </button>
+    <button class="nav-btn add" data-view="add" id="nav-add">
+      <span class="fab"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg></span>
+      Nieuw
+    </button>
+    <button class="nav-btn" data-view="stats" id="nav-stats">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      Stats
+    </button>
+  </nav>
 </div>
 
-<!-- OVERZICHT -->
-<div class="view" id="view-overzicht">
-  <div class="filter-bar">
-    <button class="filter-btn active" onclick="setFilter('alle', this)">Alle</button>
-    <button class="filter-btn" onclick="setFilter('te-koop', this)">Te koop</button>
-    <button class="filter-btn" onclick="setFilter('verkocht', this)">Verkocht</button>
-    <button class="filter-btn" onclick="setFilter('gereserveerd', this)">Gereserveerd</button>
-  </div>
-
-  <div class="export-bar">
-    <button class="btn-export btn-csv" onclick="exportCSV()">⬇ CSV</button>
-    <button class="btn-export" style="background:#e8f0fe;color:#1a56db" onclick="exportJSON()">💾 Backup</button>
-    <button class="btn-export" style="background:#e8f0fe;color:#1a56db" onclick="importHistorie()">📥 Historie</button>
-    <button class="btn-export btn-clear" onclick="clearAll()">🗑 Wis</button>
-  </div>
-  <div class="export-bar" style="margin-top:-4px">
-    <label style="flex:1;margin:0">
-      <input type="file" id="import-file" accept=".json" style="display:none" onchange="importJSON(this)">
-      <span class="btn-export" style="background:#e8f0fe;color:#1a56db;display:block;text-align:center;cursor:pointer" onclick="document.getElementById('import-file').click()">📂 Herstel backup</span>
-    </label>
-  </div>
-
-  <div id="items-list"></div>
-</div>
-
-<!-- STATS -->
-<div class="view" id="view-stats">
-  <div class="stats-grid">
-    <div class="stat-card">
-      <div class="stat-label">Totaal artikelen</div>
-      <div class="stat-value" id="stat-totaal">0</div>
+<!-- ============ ACTIEMENU SHEET ============ -->
+<div class="overlay" id="actions-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2 id="actions-naam" style="font-size:1.05rem">Artikel</h2>
+      <button class="icon-btn" data-close="actions-overlay">✕</button>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Verkocht</div>
-      <div class="stat-value positive" id="stat-verkocht">0</div>
+    <div class="action-list">
+      <button class="action-btn" id="act-edit"><span>✏️</span> Bewerken</button>
+      <button class="action-btn" id="act-sold"><span>✓</span> Markeer verkocht</button>
+      <button class="action-btn" id="act-link"><span>🔗</span> Open op Marktplaats</button>
+      <button class="action-btn" id="act-adtext"><span>📝</span> Advertentietekst</button>
+      <button class="action-btn danger" id="act-delete"><span>🗑️</span> Verwijderen</button>
     </div>
-    <div class="stat-card">
-      <div class="stat-label">Totaal inkoopkosten</div>
-      <div class="stat-value" id="stat-inkoop">€ 0</div>
-    </div>
-    <div class="stat-card">
-      <div class="stat-label">Totaal verkocht</div>
-      <div class="stat-value positive" id="stat-opbrengst">€ 0</div>
-    </div>
-    <div class="stat-card full">
-      <div class="stat-label">Omzet minus inkoopkosten</div>
-      <div class="stat-value" id="stat-winst">€ 0</div>
-    </div>
-    <div class="stat-card full">
-      <div class="stat-label">Nog te verkopen (inkoopprijs)</div>
-      <div class="stat-value" id="stat-voorraad">€ 0</div>
-    </div>
-  </div>
-
-  <div class="form-section">
-    <div class="form-section-title">📅 Per maand</div>
-    <div id="month-breakdown"></div>
-  </div>
-
-  <div class="form-section" id="top-categorie-box">
-    <div class="form-section-title">🏆 Per categorie</div>
-    <div id="cat-breakdown"></div>
   </div>
 </div>
 
-<!-- Edit Modal -->
-<div class="modal-overlay" id="modal-overlay" onclick="closeModal(event)">
-  <div class="modal" id="modal">
-    <div class="modal-handle"></div>
-    <div class="modal-title">Artikel bewerken</div>
-
+<!-- ============ EDIT SHEET ============ -->
+<div class="overlay" id="edit-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Artikel bewerken</h2>
+      <button class="icon-btn" data-close="edit-overlay">✕</button>
+    </div>
     <input type="hidden" id="edit-id">
-
-    <label>Naam artikel</label>
-    <input type="text" id="edit-naam">
-
-    <label>Categorie</label>
-    <select id="edit-categorie">
-      <option value="">— kies categorie —</option>
-      <option>Kleding</option><option>Meubels</option><option>Decoratie</option>
-      <option>Keuken</option><option>Speelgoed</option><option>Elektronica</option>
-      <option>Boeken</option><option>Sieraden / Accessoires</option>
-      <option>Kunst</option><option>Overig</option>
-    </select>
-
-    <label>Winkel</label>
-    <input type="text" id="edit-winkel">
-
-    <label>Datum inkoop</label>
-    <input type="date" id="edit-datum-inkoop">
-
-    <div class="price-row">
-      <div>
-        <label>Inkoopprijs €</label>
-        <input type="number" id="edit-prijs-in" step="0.01" min="0">
+    <div class="field">
+      <label for="edit-naam">Artikel *</label>
+      <input type="text" id="edit-naam">
+    </div>
+    <div class="field">
+      <label for="edit-categorie">Categorie</label>
+      <select id="edit-categorie"></select>
+    </div>
+    <div class="field">
+      <label for="edit-winkel">Waar gekocht</label>
+      <input type="text" id="edit-winkel">
+    </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="edit-prijs-in">Inkoopprijs</label>
+        <div class="input-prefix"><span>€</span><input type="number" id="edit-prijs-in" step="0.01" min="0" inputmode="decimal"></div>
       </div>
-      <div>
-        <label>Verkoopprijs €</label>
-        <input type="number" id="edit-prijs-uit" step="0.01" min="0">
+      <div class="field">
+        <label for="edit-prijs-uit">Verkoopprijs</label>
+        <div class="input-prefix"><span>€</span><input type="number" id="edit-prijs-uit" step="0.01" min="0" inputmode="decimal"></div>
       </div>
     </div>
+    <div class="grid-2">
+      <div class="field">
+        <label for="edit-datum-inkoop">Datum inkoop</label>
+        <input type="date" id="edit-datum-inkoop">
+      </div>
+      <div class="field">
+        <label for="edit-status">Status</label>
+        <select id="edit-status">
+          <option value="te-koop">Te koop</option>
+          <option value="gereserveerd">Gereserveerd</option>
+          <option value="verkocht">Verkocht</option>
+        </select>
+      </div>
+    </div>
+    <div class="field">
+      <label for="edit-datum-verkoop">Datum verkoop</label>
+      <input type="date" id="edit-datum-verkoop">
+    </div>
+    <div class="field">
+      <label for="edit-notitie">Notitie</label>
+      <textarea id="edit-notitie"></textarea>
+    </div>
+    <div class="field">
+      <label for="edit-link">Advertentielink (Marktplaats)</label>
+      <input type="url" id="edit-link" placeholder="https://www.marktplaats.nl/v/…" inputmode="url">
+    </div>
+    <div class="field">
+      <label for="edit-foto">Foto-URL (optioneel)</label>
+      <input type="url" id="edit-foto" placeholder="https://…/foto.jpg" inputmode="url">
+    </div>
+    <button class="btn btn-primary" id="edit-save" style="margin-top:18px">Wijzigingen opslaan</button>
+  </div>
+</div>
 
-    <label>Status</label>
-    <select id="edit-status">
-      <option value="te-koop">Te koop</option>
-      <option value="gereserveerd">Gereserveerd</option>
-      <option value="verkocht">Verkocht</option>
-    </select>
+<!-- ============ SNEL VERKOCHT SHEET ============ -->
+<div class="overlay" id="sold-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Markeer als verkocht</h2>
+      <button class="icon-btn" data-close="sold-overlay">✕</button>
+    </div>
+    <input type="hidden" id="sold-id">
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px" id="sold-naam"></p>
+    <div class="grid-2">
+      <div class="field">
+        <label for="sold-prijs">Verkoopprijs</label>
+        <div class="input-prefix"><span>€</span><input type="number" id="sold-prijs" step="0.01" min="0" inputmode="decimal"></div>
+      </div>
+      <div class="field">
+        <label for="sold-datum">Datum verkoop</label>
+        <input type="date" id="sold-datum">
+      </div>
+    </div>
+    <button class="btn btn-primary" id="sold-save" style="margin-top:18px">✓ Markeer als verkocht</button>
+  </div>
+</div>
 
-    <label>Datum verkoop</label>
-    <input type="date" id="edit-datum-verkoop">
+<!-- ============ ADVERTENTIETEKST SHEET ============ -->
+<div class="overlay" id="adtext-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Advertentietekst</h2>
+      <button class="icon-btn" data-close="adtext-overlay">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">Pas aan naar wens en kopieer naar Marktplaats.</p>
+    <div class="field">
+      <textarea id="adtext-content" style="min-height:200px"></textarea>
+    </div>
+    <button class="btn btn-primary" id="adtext-copy" style="margin-top:6px">📋 Kopieer tekst</button>
+  </div>
+</div>
 
-    <label>Notitie</label>
-    <textarea id="edit-notitie"></textarea>
+<!-- ============ SETTINGS SHEET ============ -->
+<div class="overlay" id="settings-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Instellingen</h2>
+      <button class="icon-btn" data-close="settings-overlay">✕</button>
+    </div>
 
-    <button class="btn-primary" onclick="saveEdit()" style="margin-top:16px">Opslaan</button>
+    <div class="section-title" style="margin-top:4px">Marktplaats</div>
+    <div class="card pad stack">
+      <button class="btn btn-primary" id="mp-sync-btn">🔄 Sync met Marktplaats</button>
+      <p style="font-size:0.74rem;color:var(--muted);margin:0">Haalt je actuele aanbod op: nieuwe advertenties toevoegen, vraagprijzen bijwerken, en verdwenen advertenties markeren als "verkocht?".</p>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">Maanddoel</div>
+    <div class="card pad">
+      <label for="goal-input">Omzetdoel per maand</label>
+      <div class="input-prefix"><span>€</span><input type="number" id="goal-input" placeholder="0" step="1" min="0" inputmode="decimal"></div>
+      <p style="font-size:0.74rem;color:var(--muted);margin:8px 0 0">Verschijnt als voortgangsbalk bovenaan de statistieken. Leeg = uit.</p>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">Data</div>
+    <div class="card pad stack">
+      <button class="btn btn-ghost" id="export-json">⬇️ Backup downloaden (JSON)</button>
+      <button class="btn btn-ghost" id="export-csv">📊 Exporteer als CSV</button>
+      <button class="btn btn-ghost" id="import-btn">📂 Backup-bestand importeren</button>
+      <input type="file" id="import-file" accept=".json" class="hidden">
+      <button class="btn btn-ghost" id="migrate-btn">🔄 Oude browser-data overzetten</button>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">Account</div>
+    <div class="card pad">
+      <button class="btn btn-danger" id="logout-btn">Uitloggen</button>
+    </div>
+    <p style="font-size:0.72rem;color:var(--faint);text-align:center;margin-top:16px">
+      Data wordt veilig opgeslagen in je eigen mijn.host database.
+    </p>
   </div>
 </div>
 
 <div class="toast" id="toast"></div>
 
-<script>
-let items = JSON.parse(localStorage.getItem('mp_items') || '[]');
-let currentFilter = 'alle';
-
-function save() {
-  localStorage.setItem('mp_items', JSON.stringify(items));
-}
-
-function showToast(msg) {
-  const t = document.getElementById('toast');
-  t.textContent = msg;
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2200);
-}
-
-function switchTab(tab, el) {
-  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('view-' + tab).classList.add('active');
-  if (el) el.classList.add('active');
-  if (tab === 'overzicht') renderList();
-  if (tab === 'stats') renderStats();
-}
-
-function fmt(n) {
-  return '€\u00a0' + Number(n).toFixed(2).replace('.', ',');
-}
-
-function updateProfit() {
-  const inc = parseFloat(document.getElementById('prijs-in').value) || 0;
-  const uit = parseFloat(document.getElementById('prijs-uit').value) || 0;
-  const p = document.getElementById('profit-preview');
-  if (!inc && !uit) { p.style.display = 'none'; return; }
-  p.style.display = 'flex';
-  const diff = uit - inc;
-  document.getElementById('profit-amount').textContent = fmt(diff);
-  document.getElementById('profit-label').textContent = diff >= 0 ? 'Winst' : 'Verlies';
-  p.className = 'profit-preview' + (diff < 0 ? ' loss' : '');
-}
-
-function saveItem() {
-  const naam = document.getElementById('naam').value.trim();
-  if (!naam) { showToast('Vul eerst een naam in'); return; }
-
-  const item = {
-    id: Date.now().toString(),
-    naam,
-    categorie: document.getElementById('categorie').value,
-    winkel: document.getElementById('winkel').value.trim(),
-    datumInkoop: document.getElementById('datum-inkoop').value,
-    prijsIn: parseFloat(document.getElementById('prijs-in').value) || 0,
-    prijsUit: parseFloat(document.getElementById('prijs-uit').value) || 0,
-    status: document.getElementById('status').value,
-    datumVerkoop: document.getElementById('datum-verkoop').value,
-    notitie: document.getElementById('notitie').value.trim()
-  };
-
-  items.unshift(item);
-  save();
-  showToast('✓ ' + naam + ' opgeslagen');
-
-  // reset form
-  ['naam','winkel','notitie'].forEach(id => document.getElementById(id).value = '');
-  ['prijs-in','prijs-uit'].forEach(id => document.getElementById(id).value = '');
-  ['datum-inkoop','datum-verkoop'].forEach(id => document.getElementById(id).value = '');
-  document.getElementById('categorie').value = '';
-  document.getElementById('status').value = 'te-koop';
-  document.getElementById('profit-preview').style.display = 'none';
-  document.getElementById('datum-inkoop').value = new Date().toISOString().slice(0,10);
-  // switch to overzicht and render
-  const tabEl = document.querySelector('.tab:nth-child(2)');
-  switchTab('overzicht', tabEl);
-}
-
-function setFilter(f, btn) {
-  currentFilter = f;
-  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  renderList();
-}
-
-function renderList() {
-  const list = document.getElementById('items-list');
-  const filtered = currentFilter === 'alle' ? items : items.filter(i => i.status === currentFilter);
-
-  if (!filtered.length) {
-    list.innerHTML = `<div class="empty-state"><div class="icon">📭</div><p>Geen artikelen gevonden</p></div>`;
-    return;
-  }
-
-  list.innerHTML = filtered.map(item => {
-    const winst = item.prijsUit - item.prijsIn;
-    const winstHtml = item.prijsUit
-      ? `<span class="item-winst ${winst >= 0 ? 'winst-pos' : 'winst-neg'}">${winst >= 0 ? '+' : ''}${fmt(winst)}</span>`
-      : '';
-
-    const badgeClass = { verkocht: 'badge-verkocht', 'te-koop': 'badge-te-koop', gereserveerd: 'badge-gereserveerd' }[item.status] || 'badge-geen';
-    const badgeLabel = { verkocht: 'Verkocht', 'te-koop': 'Te koop', gereserveerd: 'Gereserveerd' }[item.status] || item.status;
-
-    return `
-    <div class="item-card ${item.status}">
-      <div class="item-header">
-        <div class="item-name">${item.naam}</div>
-        <span class="status-badge ${badgeClass}">${badgeLabel}</span>
-      </div>
-      <div class="item-meta">
-        ${item.categorie ? `<span>📂 ${item.categorie}</span>` : ''}
-        ${item.winkel ? `<span>🏪 ${item.winkel}</span>` : ''}
-        ${item.datumInkoop ? `<span>📅 ${item.datumInkoop}</span>` : ''}
-        ${item.datumVerkoop ? `<span>✅ ${item.datumVerkoop}</span>` : ''}
-      </div>
-      <div class="item-prices">
-        <div class="price-in">inkoop <span>${fmt(item.prijsIn)}</span></div>
-        ${item.prijsUit ? `<div class="price-out">verkoop <span>${fmt(item.prijsUit)}</span></div>` : ''}
-        ${winstHtml}
-      </div>
-      ${item.notitie ? `<div class="item-note">${item.notitie}</div>` : ''}
-      <div class="item-actions">
-        <button class="btn-action" onclick="editItem('${item.id}')">✏️ Bewerken</button>
-        <button class="btn-action del" onclick="deleteItem('${item.id}')">🗑 Verwijder</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-function deleteItem(id) {
-  if (!confirm('Artikel verwijderen?')) return;
-  items = items.filter(i => i.id !== id);
-  save();
-  renderList();
-  showToast('Verwijderd');
-}
-
-function editItem(id) {
-  const item = items.find(i => i.id === id);
-  if (!item) return;
-  document.getElementById('edit-id').value = id;
-  document.getElementById('edit-naam').value = item.naam;
-  document.getElementById('edit-categorie').value = item.categorie || '';
-  document.getElementById('edit-winkel').value = item.winkel || '';
-  document.getElementById('edit-datum-inkoop').value = item.datumInkoop || '';
-  document.getElementById('edit-prijs-in').value = item.prijsIn || '';
-  document.getElementById('edit-prijs-uit').value = item.prijsUit || '';
-  document.getElementById('edit-status').value = item.status;
-  document.getElementById('edit-datum-verkoop').value = item.datumVerkoop || '';
-  document.getElementById('edit-notitie').value = item.notitie || '';
-  document.getElementById('modal-overlay').classList.add('open');
-}
-
-function saveEdit() {
-  const id = document.getElementById('edit-id').value;
-  const idx = items.findIndex(i => i.id === id);
-  if (idx < 0) return;
-  items[idx] = {
-    ...items[idx],
-    naam: document.getElementById('edit-naam').value.trim(),
-    categorie: document.getElementById('edit-categorie').value,
-    winkel: document.getElementById('edit-winkel').value.trim(),
-    datumInkoop: document.getElementById('edit-datum-inkoop').value,
-    prijsIn: parseFloat(document.getElementById('edit-prijs-in').value) || 0,
-    prijsUit: parseFloat(document.getElementById('edit-prijs-uit').value) || 0,
-    status: document.getElementById('edit-status').value,
-    datumVerkoop: document.getElementById('edit-datum-verkoop').value,
-    notitie: document.getElementById('edit-notitie').value.trim()
-  };
-  save();
-  document.getElementById('modal-overlay').classList.remove('open');
-  renderList();
-  showToast('✓ Opgeslagen');
-}
-
-function closeModal(e) {
-  if (e.target === document.getElementById('modal-overlay'))
-    document.getElementById('modal-overlay').classList.remove('open');
-}
-
-function renderStats() {
-  const verkocht = items.filter(i => i.status === 'verkocht');
-  const totaalIn = items.reduce((s, i) => s + i.prijsIn, 0);
-  const opbrengst = verkocht.reduce((s, i) => s + i.prijsUit, 0);
-  const inkoopVerkocht = verkocht.reduce((s, i) => s + i.prijsIn, 0);
-  const winst = opbrengst - inkoopVerkocht;
-  const voorraadWaarde = items.filter(i => i.status !== 'verkocht').reduce((s, i) => s + i.prijsIn, 0);
-
-  document.getElementById('stat-totaal').textContent = items.length;
-  document.getElementById('stat-verkocht').textContent = verkocht.length;
-  document.getElementById('stat-inkoop').textContent = fmt(totaalIn);
-  document.getElementById('stat-opbrengst').textContent = fmt(opbrengst);
-
-  const wEl = document.getElementById('stat-winst');
-  wEl.textContent = fmt(winst);
-  wEl.className = 'stat-value ' + (winst >= 0 ? 'positive' : 'negative');
-
-  document.getElementById('stat-voorraad').textContent = fmt(voorraadWaarde);
-
-  // per maand (op basis van verkoopdatum)
-  const maanden = {};
-  const maandNamen = ['jan','feb','mrt','apr','mei','jun','jul','aug','sep','okt','nov','dec'];
-  verkocht.forEach(i => {
-    const d = i.datumVerkoop || i.datumInkoop;
-    if (!d) return;
-    const key = d.slice(0, 7); // "2024-03"
-    if (!maanden[key]) maanden[key] = { omzet: 0, inkoop: 0, n: 0 };
-    maanden[key].omzet += i.prijsUit;
-    maanden[key].inkoop += i.prijsIn;
-    maanden[key].n++;
-  });
-
-  const maandSorted = Object.entries(maanden).sort((a, b) => b[0].localeCompare(a[0]));
-
-  // build month data with items per category per product
-  const maandItems = {};
-  verkocht.forEach(i => {
-    const d = i.datumVerkoop || i.datumInkoop;
-    if (!d) return;
-    const key = d.slice(0, 7);
-    if (!maandItems[key]) maandItems[key] = [];
-    maandItems[key].push(i);
-  });
-
-  const maandSorted2 = Object.entries(maandItems).sort((a, b) => b[0].localeCompare(a[0]));
-
-  document.getElementById('month-breakdown').innerHTML = maandSorted2.length
-    ? maandSorted2.map(([key, mitems], mi) => {
-        const [jaar, mIdx] = key.split('-');
-        const label = maandNamen[parseInt(mIdx) - 1] + ' ' + jaar;
-        const omzet = mitems.reduce((s, i) => s + i.prijsUit, 0);
-        const inkoop = mitems.reduce((s, i) => s + i.prijsIn, 0);
-        const winst = omzet - inkoop;
-
-        // group by category
-        const cats = {};
-        mitems.forEach(i => {
-          const c = i.categorie || 'Overig';
-          if (!cats[c]) cats[c] = [];
-          cats[c].push(i);
-        });
-        const catsSorted = Object.entries(cats).sort((a,b) => {
-          const aT = b[1].reduce((s,i)=>s+i.prijsUit,0);
-          const bT = a[1].reduce((s,i)=>s+i.prijsUit,0);
-          return aT - bT;
-        });
-
-        const catsHtml = catsSorted.map(([cat, citems], ci) => {
-          const cOmzet = citems.reduce((s,i)=>s+i.prijsUit,0);
-          const cWinst = citems.reduce((s,i)=>s+i.prijsUit-i.prijsIn,0);
-          const productsHtml = citems.map(p =>
-            `<div class="product-item">
-              <span>${p.naam}</span>
-              <span style="color:var(--green);white-space:nowrap;margin-left:8px">${fmt(p.prijsUit)}</span>
-            </div>`
-          ).join('');
-          return `<div>
-            <div class="cat-row" onclick="toggleBlock('pl-${mi}-${ci}', this)">
-              <div>
-                <div style="font-size:0.85rem;font-weight:500">${cat}</div>
-                <div style="font-size:0.72rem;color:var(--muted)">${citems.length} artikel${citems.length>1?'en':''}</div>
-              </div>
-              <div style="display:flex;align-items:center;gap:6px">
-                <div style="font-family:'Fraunces',serif;font-weight:700;font-size:0.9rem;color:var(--green)">${fmt(cOmzet)}</div>
-                <span class="accordion-arrow">▶</span>
-              </div>
-            </div>
-            <div class="product-list" id="pl-${mi}-${ci}">${productsHtml}</div>
-          </div>`;
-        }).join('');
-
-        return `<div class="accordion-row">
-          <div class="accordion-header" onclick="toggleBlock('mb-${mi}', this)">
-            <div>
-              <div style="font-weight:500;text-transform:capitalize">${label}</div>
-              <div style="font-size:0.75rem;color:var(--muted)">${mitems.length} verkocht · ${fmt(omzet)}</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="font-family:'Fraunces',serif;font-weight:700;color:${winst>=0?'var(--green)':'var(--red)'}">
-                ${winst>=0?'+':''}${fmt(winst)}
-              </div>
-              <span class="accordion-arrow">▶</span>
-            </div>
-          </div>
-          <div class="accordion-body" id="mb-${mi}">${catsHtml}</div>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:0.85rem">Nog niets verkocht met datum</p>';
-
-  // per categorie (totaal, ook met uitklap)
-  const cats = {};
-  verkocht.forEach(i => {
-    const c = i.categorie || 'Overig';
-    if (!cats[c]) cats[c] = [];
-    cats[c].push(i);
-  });
-  const sorted = Object.entries(cats).sort((a,b) => {
-    const aw = b[1].reduce((s,i)=>s+i.prijsUit-i.prijsIn,0);
-    const bw = a[1].reduce((s,i)=>s+i.prijsUit-i.prijsIn,0);
-    return aw - bw;
-  });
-
-  document.getElementById('cat-breakdown').innerHTML = sorted.length
-    ? sorted.map(([cat, citems], ci) => {
-        const out = citems.reduce((s,i)=>s+i.prijsUit,0);
-        const w = citems.reduce((s,i)=>s+i.prijsUit-i.prijsIn,0);
-        const productsHtml = citems.map(p =>
-          `<div class="product-item">
-            <span>${p.naam}</span>
-            <span style="color:var(--green);white-space:nowrap;margin-left:8px">${fmt(p.prijsUit)}</span>
-          </div>`
-        ).join('');
-        return `<div class="accordion-row">
-          <div class="accordion-header" onclick="toggleBlock('cb-${ci}', this)">
-            <div>
-              <div style="font-weight:500">${cat}</div>
-              <div style="font-size:0.75rem;color:var(--muted)">${citems.length} verkocht</div>
-            </div>
-            <div style="display:flex;align-items:center;gap:6px">
-              <div style="font-family:'Fraunces',serif;font-weight:700;color:${w>=0?'var(--green)':'var(--red)'}">
-                ${w>=0?'+':''}${fmt(w)}
-              </div>
-              <span class="accordion-arrow">▶</span>
-            </div>
-          </div>
-          <div class="accordion-body" id="cb-${ci}">${productsHtml}</div>
-        </div>`;
-      }).join('')
-    : '<p style="color:var(--muted);font-size:0.85rem">Nog niets verkocht</p>';
-}
-
-function toggleBlock(id, headerEl) {
-  const body = document.getElementById(id);
-  if (!body) return;
-  const arrow = headerEl.querySelector('.accordion-arrow');
-  const isOpen = body.classList.contains('open');
-  body.classList.toggle('open', !isOpen);
-  if (arrow) arrow.classList.toggle('open', !isOpen);
-}
-
-function exportCSV() {
-  if (!items.length) { showToast('Geen data om te exporteren'); return; }
-
-  const header = ['Naam','Categorie','Winkel','Datum inkoop','Inkoopprijs','Verkoopprijs','Winst','Status','Datum verkoop','Notitie'];
-  const rows = items.map(i => [
-    i.naam, i.categorie, i.winkel, i.datumInkoop,
-    i.prijsIn.toFixed(2), i.prijsUit ? i.prijsUit.toFixed(2) : '',
-    i.prijsUit ? (i.prijsUit - i.prijsIn).toFixed(2) : '',
-    i.status, i.datumVerkoop, i.notitie
-  ].map(v => `"${(v||'').toString().replace(/"/g,'""')}"`).join(','));
-
-  const csv = [header.join(','), ...rows].join('\n');
-  const blob = new Blob(['\ufeff' + csv], { type: 'text/csv;charset=utf-8' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'marktplaats_' + new Date().toISOString().slice(0,10) + '.csv';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('✓ CSV gedownload');
-}
-
-function clearAll() {
-  if (!confirm('Weet je zeker dat je ALLE artikelen wilt verwijderen? Dit kan niet ongedaan worden gemaakt.')) return;
-  items = [];
-  save();
-  renderList();
-  showToast('Alles gewist');
-}
-
-
-const HIST_DATA = [{"id": "738156001", "naam": "Jan Cremer espresso kopje", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156002", "naam": "Antieke muurbeugel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 18.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156003", "naam": "4x Bohemia champagneglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156004", "naam": "Johnnie walker schort", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156005", "naam": "Presse paper onderwaterwereld", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156006", "naam": "Taktel metronoom", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 11.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156007", "naam": "2x escargot tangen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156008", "naam": "Waterpijp", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156009", "naam": "Onderzetter Corneille", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156010", "naam": "Wandhaak varkenskop", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156011", "naam": "Zwilling kinder bestek", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156012", "naam": "2 Scott Zwiesel glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 4.25, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156013", "naam": "7x Chinese soeplepels", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 7.25, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156014", "naam": "Boekje puber", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156015", "naam": "Play me puntenslijper", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.25, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156016", "naam": "Servethouder", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.75, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156017", "naam": "Glazen cognac 2x", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156018", "naam": "Onderzetters Australie", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 6.25, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738156019", "naam": "Horloge", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-01-01", "prijsIn": 0.0, "prijsUit": 6.05, "status": "verkocht", "datumVerkoop": "2022-01-01", "notitie": ""}, {"id": "738187020", "naam": "Tegeltjes klm", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187021", "naam": "3x riedel glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187022", "naam": "2x spiegelau whisky glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187023", "naam": "2x Baileys glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 9.25, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187024", "naam": "3x Disney bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187025", "naam": "Winkelwagenmuntje", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 1.71, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187026", "naam": "2x glazen jameson", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187027", "naam": "2x Amsterdam blond bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187028", "naam": "2x bevers beeldjes", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187029", "naam": "2x dubbelwandige spiegelau glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187030", "naam": "2x Jet bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187031", "naam": "Tegeltje bakker", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 7.95, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187032", "naam": "Puzzel Suske en Wiske", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187033", "naam": "Sleutelhanger diddelina", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 3.8, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187034", "naam": "Diddle spulletjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187035", "naam": "Aziatisch meisje beeldje", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187036", "naam": "2x kop schotel cappuccino", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187037", "naam": "Dvd mannen harten", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187038", "naam": "4x wijnglazen blauwe kelk", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738187039", "naam": "2x sap glazen natural", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-02-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-02-01", "notitie": ""}, {"id": "738215040", "naam": "5 shotglazen France", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215041", "naam": "6x zwarte champagneglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 16.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215042", "naam": "Grijze blazer via Vinted", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215043", "naam": "6x bierglazen viven", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215044", "naam": "Gel 2x LOreal", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 1.25, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215045", "naam": "2x Amefa kinderbestek", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215046", "naam": "2x Port glazen Jamie Oliver", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215047", "naam": "Wandhaak Limoges", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215048", "naam": "2x Japanse mokken", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215049", "naam": "6 Chinese lepels oma", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.5, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215050", "naam": "Fotolijstje", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.65, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215051", "naam": "Besparende douchekop", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 25.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215052", "naam": "Puzzel kat fotolijstje mama", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215053", "naam": "Botonica potje paarse bloem", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215054", "naam": "2x Amalfi kandelaars", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215055", "naam": "6x Jamie Oliver wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 24.25, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215056", "naam": "Bierglas Duvel", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 13.12, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215057", "naam": "Blauw spijkerbroekje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 5.99, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215058", "naam": "2x eierdopjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 14.12, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215059", "naam": "4x espressokopjes jet vogels", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 16.12, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738215060", "naam": "2x rode wijn glazen Saphir", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-03-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-03-01", "notitie": ""}, {"id": "738246061", "naam": "Suikerpot kristal", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246062", "naam": "2x Blokker huisjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246063", "naam": "St. Bernard spaarpot", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 10.5, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246064", "naam": "DHL kortingscode", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 1.12, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246065", "naam": "Potje eenden", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246066", "naam": "6x bekers Jos Gielen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 18.12, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246067", "naam": "Mama spulletjes mp", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246068", "naam": "5x Villeroy en Boch bierglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 13.12, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246069", "naam": "2x groene wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 7.12, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246070", "naam": "4 decoratie visjes nep aas", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246071", "naam": "Rommelmarkt", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 16.5, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246072", "naam": "Boek Wesley", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 3.99, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246073", "naam": "4 glazen Luminarc wijn", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 12.65, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738246074", "naam": "Dvd Marilyn", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-04-01", "prijsIn": 0.0, "prijsUit": 6.88, "status": "verkocht", "datumVerkoop": "2022-04-01", "notitie": ""}, {"id": "738276075", "naam": "Tapas bestek", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 8.99, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276076", "naam": "Koeien schaaltjes Friesland", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 18.62, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276077", "naam": "Kinderbestek beertjes nieuw", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 8.49, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276078", "naam": "Boeien huisnummer 28", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 11.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276079", "naam": "2 martini Luminarc glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 9.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276080", "naam": "Katten goebel beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 16.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276081", "naam": "Chinese schaaltjes lepeltjes", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 31.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276082", "naam": "Schaaltje emaille", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 9.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276083", "naam": "Roze jurkje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 9.84, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276084", "naam": "Koffiefilterhouder Pools", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 31.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276085", "naam": "Bierglas Duvel", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 23.0, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276086", "naam": "Speldje vergeet mij niet", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 2.96, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276087", "naam": "Ijs emmer kristal", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 11.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276088", "naam": "Bierglas Duvel oma", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 10.37, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276089", "naam": "Geel botonica dekseldoosje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 12.62, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276090", "naam": "Beeldje meisje boek schoteltjes drinkende mannen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 15.87, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276091", "naam": "6x whiskey glazen Scott", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276092", "naam": "Nijntje knuffel", "categorie": "Speelgoed & knuffels", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276093", "naam": "2x IKEA mokken", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276094", "naam": "2x ganzen beeldjes", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 8.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738276095", "naam": "6x Jamie Oliver glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-05-01", "prijsIn": 0.0, "prijsUit": 11.12, "status": "verkocht", "datumVerkoop": "2022-05-01", "notitie": ""}, {"id": "738307096", "naam": "2x jurkjes", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307097", "naam": "Liniaal briefopener", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307098", "naam": "Kistje schelpen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307099", "naam": "2x beker katten", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 7.12, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307100", "naam": "Tinnen onderzetters", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 16.62, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307101", "naam": "Nep leren jasje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 6.12, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307102", "naam": "Grohe douche stang kop", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307103", "naam": "Blond Amsterdam beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307104", "naam": "Ikea lamp", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307105", "naam": "5x Roemer wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307106", "naam": "Boek Parijs", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307107", "naam": "Boek vrolijkheid", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307108", "naam": "Waterkan 6 glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 24.5, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738307109", "naam": "Champagneglazen Luminarc", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-06-01", "prijsIn": 0.0, "prijsUit": 9.5, "status": "verkocht", "datumVerkoop": "2022-06-01", "notitie": ""}, {"id": "738337110", "naam": "2x kleine Jaap bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 11.5, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337111", "naam": "3x wijnglas Cahors", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337112", "naam": "3 fotolijstjes", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337113", "naam": "7 kommen Jet vogels", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 27.5, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337114", "naam": "4 borden jet vogels", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337115", "naam": "Kop en schotels klaproos", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337116", "naam": "Wastafel", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337117", "naam": "6 champagneglazen Luminarc", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 16.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337118", "naam": "Keykcord paars mama", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 1.8, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337119", "naam": "Bierglas warnsteiner", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 5.5, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738337120", "naam": "Kapstok vis", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-07-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-07-01", "notitie": ""}, {"id": "738368121", "naam": "Boek Japanse manga tekenen", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 8.05, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368122", "naam": "4 Chinese lepels wijze man", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368123", "naam": "4 Roemer wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 10.5, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368124", "naam": "Laptopstandaard", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368125", "naam": "Lijst ijsvogel flesopener dolfijn", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368126", "naam": "4x Pavel panek schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368127", "naam": "Miss Etam riem", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 5.75, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368128", "naam": "3x bekers Love Myrte", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368129", "naam": "2x Lion king bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368130", "naam": "12x onderzetters Jbs", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368131", "naam": "Keycord ziggo mama", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738368132", "naam": "2x pomanders", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-08-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2022-08-01", "notitie": ""}, {"id": "738399133", "naam": "Connie palmen boek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399134", "naam": "Beker katten Roy Kirkham", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399135", "naam": "Eierdopjes maanden feb en mei", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399136", "naam": "Suikerpotje arcoroc", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399137", "naam": "Presse papier glazen bal", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399138", "naam": "2x champagneglazen kolibrie", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399139", "naam": "Mini servies Limoges wandborden", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399140", "naam": "Zwart jurkje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399141", "naam": "6x Fairtrade onderzetters", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399142", "naam": "Onderzetters Vinyl", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399143", "naam": "2x roze champagneglazen Luminarc", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 5.4, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738399144", "naam": "2x Jameson glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-09-01", "notitie": ""}, {"id": "738429145", "naam": "Badkamerkleedje IKEA", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429146", "naam": "Bestekset Jip en Janneke", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429147", "naam": "2x varkenskoppen haakjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429148", "naam": "Waaier boekje vogels", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 5.96, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429149", "naam": "Delftsblauw koe roomservies", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429150", "naam": "Emaille clip", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429151", "naam": "2x panter blikjes sigaren", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429152", "naam": "Postzegelvelletje Malta vogels", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429153", "naam": "Dienblad light living", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429154", "naam": "Kruidenpotjes Franklin Mint", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429155", "naam": "Kort spijkerbroekje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429156", "naam": "Kaarsendover", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429157", "naam": "Wandornament blad light living", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429158", "naam": "6x onderzetters Fairtrade", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429159", "naam": "2x kommen senatori brinta", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 9.25, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429160", "naam": "Wandbord M. Valero", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429161", "naam": "Gele rugzak ede mama", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 1.0, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738429162", "naam": "Ketting Camps Camps", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-10-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2022-10-01", "notitie": ""}, {"id": "738460163", "naam": "4x schaaltjes miluska", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 11.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460164", "naam": "Bestek holly", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460165", "naam": "Jip en Janneke bord en schaal", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 5.5, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460166", "naam": "4x waxinelichthouders Marc Aurel", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 10.5, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460167", "naam": "IJsvogel beeldje", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460168", "naam": "Kookboek Vichy", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460169", "naam": "Primark blazer", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 3.3, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460170", "naam": "2x Bonny Krosno waxinelichtjes", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460171", "naam": "Kunst boek J. Turner", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460172", "naam": "2 schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460173", "naam": "Ijsbeer knuffel mama", "categorie": "Speelgoed & knuffels", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460174", "naam": "Emaille schaaltje", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460175", "naam": "Boek jaren 1965", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460176", "naam": "2x Jack Daniels glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460177", "naam": "Wijnkaraf", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460178", "naam": "Vaas groen wit gestreept", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738460179", "naam": "Dvd Big Eyes", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2022-11-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2022-11-01", "notitie": ""}, {"id": "738490180", "naam": "2x waxinelichthouders IKEA", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490181", "naam": "4x borrel glaasjes Likeur 43", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490182", "naam": "Zadel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490183", "naam": "Blond Amsterdam suikerpot", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490184", "naam": "4x grotere likeur 43 glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490185", "naam": "Bier beker Budweiser", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490186", "naam": "2x glazen Luigi Bormioli", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490187", "naam": "Wandhaak katten", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490188", "naam": "Muurbeugel paard", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490189", "naam": "Limoges mini servies", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490190", "naam": "Wijnstopper paard", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490191", "naam": "Twee Disney bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490192", "naam": "Tegeltje oester eerster", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490193", "naam": "Onderzetters klassieke autos", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490194", "naam": "Riverdale taartplateau", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 11.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490195", "naam": "Wijnstopper amethist", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490196", "naam": "Speelkaarten", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738490197", "naam": "Vinted tas chick on a mission", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2022-12-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2022-12-01", "notitie": ""}, {"id": "738580198", "naam": "3 kandelaars Bolsius", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580199", "naam": "4x shotglaasjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580200", "naam": "7x Peijnenburg bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 17.5, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580201", "naam": "Kosta boda sfeerlicht", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580202", "naam": "2x blond Amsterdam bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580203", "naam": "Armband India", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580204", "naam": "Muziek oortjes oma", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 9.05, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580205", "naam": "Riem", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580206", "naam": "Disney Mickey Mouse bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580207", "naam": "DVD Angora", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 2.35, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580208", "naam": "Vogel blik", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738580209", "naam": "Eeyore beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-03-01", "notitie": ""}, {"id": "738611210", "naam": "2 stenen gieter beeldjes", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611211", "naam": "Monitor", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611212", "naam": "Olifant lamp", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 22.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611213", "naam": "Blond A. Efteling glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611214", "naam": "Ketting Palleten mama", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611215", "naam": "Blond A. Peper en zoutstel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611216", "naam": "4 Chinese lepels", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611217", "naam": "Onderzetters dieren", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611218", "naam": "Onderzetters Gogh", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611219", "naam": "Waxinelichthouder blad", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738611220", "naam": "Koeien schaaltjes 3 boeken", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-04-01", "prijsIn": 0.0, "prijsUit": 23.0, "status": "verkocht", "datumVerkoop": "2023-04-01", "notitie": ""}, {"id": "738641221", "naam": "Minnie Mouse beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641222", "naam": "Pomander", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 5.54, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641223", "naam": "Suske Wiske schaaltje", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 3.25, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641224", "naam": "Boek bomen en struiken", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641225", "naam": "9 eierdopjes zwarte kippen", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 18.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641226", "naam": "Flesopener anker", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641227", "naam": "Wasgij puzzle mama", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641228", "naam": "Notitieboek meisje parel", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 6.55, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641229", "naam": "Linedance gesp", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641230", "naam": "Potje Rosina kat", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641231", "naam": "4 schaaltjes ben en jerry", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 9.05, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738641232", "naam": "Wandbord bloemen", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-05-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2023-05-01", "notitie": ""}, {"id": "738672233", "naam": "Theemokken roodborstje", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672234", "naam": "Boek buiten blijft t zondag", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672235", "naam": "Suske en Wiske schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672236", "naam": "Tafelbel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672237", "naam": "Theepot", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672238", "naam": "2x Jamie glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672239", "naam": "2x Bacardi glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 8.01, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672240", "naam": "2x Gusta mokken", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672241", "naam": "Paars T-shirt", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738672242", "naam": "Twee IKEA mokken", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-06-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2023-06-01", "notitie": ""}, {"id": "738702243", "naam": "Vlinder broche", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 3.41, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702244", "naam": "Onderzetters Van Gogh", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702245", "naam": "Jungle lampenkap", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 11.5, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702246", "naam": "Stoofpotje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702247", "naam": "Kinderbestek", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 4.55, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702248", "naam": "3x DE kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702249", "naam": "3x parfum flesjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702250", "naam": "Parfum flesje Bat Sheba", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702251", "naam": "2x pols potten waxinelichthouders", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702252", "naam": "4x Suske Wiske glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738702253", "naam": "Taartplateau zwart", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-07-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2023-07-01", "notitie": ""}, {"id": "738733254", "naam": "Taartschep", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733255", "naam": "Boek Holy Hart", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733256", "naam": "Telefoonkaarten verzameling", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 160.9, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733257", "naam": "Boek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733258", "naam": "Wandhaken paarden koppen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733259", "naam": "Whinnie the Pooh beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 5.5, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733260", "naam": "2x Roemer glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733261", "naam": "Bierpull", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733262", "naam": "Fietsbel blauw wit", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733263", "naam": "Flamingo beeld", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733264", "naam": "IJsglas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733265", "naam": "Thermobeker to go mug", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733266", "naam": "Asbak", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733267", "naam": "Kristallen wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733268", "naam": "Bierglas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738733269", "naam": "Gieter", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2023-08-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2023-08-01", "notitie": ""}, {"id": "738764270", "naam": "Dienblad", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764271", "naam": "Beeldje zwanen", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764272", "naam": "Glazen bol", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764273", "naam": "Kook schort", "categorie": "Keuken & huishouden", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 11.5, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764274", "naam": "Ketting", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764275", "naam": "2 whiskeyglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764276", "naam": "6 kaas prikkers", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 25.5, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764277", "naam": "Oude tabakspijp", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738764278", "naam": "Decoratieve bol", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-09-01", "prijsIn": 0.0, "prijsUit": 8.45, "status": "verkocht", "datumVerkoop": "2023-09-01", "notitie": ""}, {"id": "738794279", "naam": "Kristallen karaf", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 16.9, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794280", "naam": "3 waxinelichthouders", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 14.05, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794281", "naam": "Fotolijstje Jyden", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794282", "naam": "Voetbalshirt", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794283", "naam": "Emaille kan", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794284", "naam": "2x kop en schotel Gaudi", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794285", "naam": "Stropdas", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794286", "naam": "2x Jameson glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794287", "naam": "2x Johnie walker glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794288", "naam": "2x Suske Wiske schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738794289", "naam": "Dvd Bambi", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-10-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2023-10-01", "notitie": ""}, {"id": "738825290", "naam": "Tinnen beeldje", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825291", "naam": "Boek mode tekenen", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825292", "naam": "Postzegelvelletje", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 3.05, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825293", "naam": "Katten schoteltjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825294", "naam": "Boekenlegger", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 4.4, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825295", "naam": "Notenkraker", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738825296", "naam": "Thermos beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2023-11-01", "notitie": ""}, {"id": "738855297", "naam": "2x Disney bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855298", "naam": "Bestekset beertjes", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855299", "naam": "Boek zonnewijzer", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855300", "naam": "Flesstop", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855301", "naam": "4 Remy glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855302", "naam": "2x Bacardi glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 6.55, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855303", "naam": "Drip bloempot", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 22.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855304", "naam": "2x Francieen katten kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738855305", "naam": "Beer bakvorm", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2023-12-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2023-12-01", "notitie": ""}, {"id": "738946306", "naam": "Villeroy Boch 2 bord schaal", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 25.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946307", "naam": "Kookboek aviko", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946308", "naam": "Koeschaal", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 16.01, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946309", "naam": "Villeroy Boch schaal", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 11.01, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946310", "naam": "Autoradio Wes", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946311", "naam": "Villeroy Boch bierglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 30.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946312", "naam": "Autoradio Wes 2", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946313", "naam": "Rieten hartjes bruiloft", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946314", "naam": "2x IKEA stoelen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946315", "naam": "2x zonnebloem schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946316", "naam": "4 eierdopjes Margriet", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946317", "naam": "Metalen gieter", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738946318", "naam": "Wandhaak sleutel", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2024-03-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2024-03-01", "notitie": ""}, {"id": "738977319", "naam": "Kaartspel xl", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977320", "naam": "Kinderboek drie houten pijlen", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977321", "naam": "Flitsstudio set", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 50.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977322", "naam": "Spijkerbroek Tom Tailor Vinted", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977323", "naam": "Vier pannen onderzetters", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 17.51, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977324", "naam": "Bierglas warnsteiner", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977325", "naam": "Keycord mama", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 1.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977326", "naam": "3x mokken vlinders", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977327", "naam": "2x Holland line tegeltjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 9.95, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977328", "naam": "Boek katten", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977329", "naam": "Reisgids Zuid-Afrika", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977330", "naam": "2x oude fotolijstjes", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977331", "naam": "2x west Germany bloempotten", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977332", "naam": "Bordspel Congo", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 4.9, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "738977333", "naam": "Lectuurbak", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-04-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2024-04-01", "notitie": ""}, {"id": "739007334", "naam": "Groene espresso glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 35.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007335", "naam": "Kippen eierdoppen", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007336", "naam": "2x Licor 43 glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007337", "naam": "Kristallen schaaltje 2 vodka glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007338", "naam": "Surinaamse houten lepeltjes", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007339", "naam": "Kruidvat koffie kopje", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007340", "naam": "Zwarte kapstok", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007341", "naam": "Postzegels", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 2.2, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007342", "naam": "Kinderboek beestjes", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739007343", "naam": "6x Spiegelau wijnglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-05-01", "prijsIn": 0.0, "prijsUit": 16.01, "status": "verkocht", "datumVerkoop": "2024-05-01", "notitie": ""}, {"id": "739038344", "naam": "2x champagneglazen Luminarc", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038345", "naam": "Mepal mix beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038346", "naam": "Nikkie kaftan", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 23.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038347", "naam": "Spiegel lijst", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038348", "naam": "Blousje bloemen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038349", "naam": "Kaarsendover olifant", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739038350", "naam": "Boek Annemarie Oster", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-06-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-06-01", "notitie": ""}, {"id": "739068351", "naam": "2x tijdschriften", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 3.55, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068352", "naam": "Spaarpot kubus", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068353", "naam": "Jip en Janneke bordjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068354", "naam": "Boek Ruth", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 4.55, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068355", "naam": "Tijdschrift fotografie", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068356", "naam": "Bloempot", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068357", "naam": "Glazen cerve", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739068358", "naam": "3x Aurel glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-07-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-07-01", "notitie": ""}, {"id": "739099359", "naam": "Jyden fotolijst", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099360", "naam": "Cosy trendy bord", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099361", "naam": "Boek politie", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099362", "naam": "Disney Mickey munt", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099363", "naam": "Koektrommel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 17.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099364", "naam": "Flesopener vingers", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099365", "naam": "Eierdopjes Zweeds", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099366", "naam": "Kruidenboekje", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099367", "naam": "Schaaltjes Vivo", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099368", "naam": "Etos armbandje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 1.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099369", "naam": "Disney pin zeemeermin", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099370", "naam": "Opnametafel", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099371", "naam": "4x Suske en Wiske schalen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099372", "naam": "Riem Wesley", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 8.2, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099373", "naam": "Kopje Nivea Oma", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739099374", "naam": "Disney muntje", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-08-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2024-08-01", "notitie": ""}, {"id": "739130375", "naam": "Tinnen potje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130376", "naam": "Pinguin kurkentrekker", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130377", "naam": "2x tegeltjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130378", "naam": "Groen vaasje", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130379", "naam": "Cinema set Wesley", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 17.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130380", "naam": "Kinderboek nachtegaal", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130381", "naam": "Wesley tv", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 50.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130382", "naam": "Twee DE kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130383", "naam": "2x blauwe champagneglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 5.5, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739130384", "naam": "IKEA lamp Wesley", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2024-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-09-01", "notitie": ""}, {"id": "739160385", "naam": "Kaarsendover haan", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160386", "naam": "6x Luminarc champagneglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160387", "naam": "Toilet plaatje meisje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160388", "naam": "Roze vaas", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160389", "naam": "2x tuimel glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 4.85, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160390", "naam": "2x kleine gele bloempotjes", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160391", "naam": "Messenleggers teckels", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 17.5, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160392", "naam": "Emaille asbak", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160393", "naam": "Eierdopjes Rien", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739160394", "naam": "Kattenmandje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-10-01", "notitie": ""}, {"id": "739191395", "naam": "Tommy stropdas", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191396", "naam": "Suske en Wiske schaaltje", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191397", "naam": "Vivo schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191398", "naam": "Beeldje beren", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191399", "naam": "CD klassiek", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 3.3, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191400", "naam": "Rode vaas", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191401", "naam": "Muziek boxjes mama", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191402", "naam": "Kopjes Rien poortvliet", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191403", "naam": "Suske Wiske schaaltje", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 3.05, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191404", "naam": "3x disaronno glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191405", "naam": "Goebel katten waxinelicht", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191406", "naam": "Kookboek Aviko", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191407", "naam": "Mac glas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191408", "naam": "Spelletje reizen", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 4.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191409", "naam": "3x Jameson glas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739191410", "naam": "Stereo set Wesley", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2024-11-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2024-11-01", "notitie": ""}, {"id": "739221411", "naam": "Likeur glaasje welp", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221412", "naam": "Roze vaasje", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221413", "naam": "2x vogel vaasjes", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 13.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221414", "naam": "2x bailey glazen gekleurde rand", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221415", "naam": "2x bailey glazen zonder rand", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221416", "naam": "Boek Wim kieft", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 3.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221417", "naam": "Zwarte jurk", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221418", "naam": "Duvel glas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221419", "naam": "Hello kitty", "categorie": "Speelgoed & knuffels", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739221420", "naam": "Onderzetters voor mama", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2024-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2024-12-01", "notitie": ""}, {"id": "739311421", "naam": "Twee blauwe gin glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-03-01", "notitie": ""}, {"id": "739311422", "naam": "Woonmagazine", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-03-01", "prijsIn": 0.0, "prijsUit": 2.0, "status": "verkocht", "datumVerkoop": "2025-03-01", "notitie": ""}, {"id": "739311423", "naam": "Zomerjurkje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-03-01", "prijsIn": 0.0, "prijsUit": 5.25, "status": "verkocht", "datumVerkoop": "2025-03-01", "notitie": ""}, {"id": "739342424", "naam": "Nietmachine", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 9.05, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342425", "naam": "Olielamp", "categorie": "Verlichting", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 8.5, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342426", "naam": "Puzzel Asterix", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342427", "naam": "Bruiloft haarkam", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342428", "naam": "Katten blik", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342429", "naam": "Jurkje topje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 3.6, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342430", "naam": "Blauw Delfts blauw potje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342431", "naam": "Deksel pan", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342432", "naam": "Wandelementen bloempot", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739342433", "naam": "5 cognac glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-04-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-04-01", "notitie": ""}, {"id": "739372434", "naam": "Katten placemats", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372435", "naam": "Franse pan", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372436", "naam": "Vier DE schoteltje", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372437", "naam": "Boekenleggers fotolijstjes", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372438", "naam": "Paardenhoofd", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372439", "naam": "Rieten onderzetters", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372440", "naam": "Wandtegeltje molen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372441", "naam": "Klok", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 16.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372442", "naam": "4 tijdschriften", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372443", "naam": "2x Jameson glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 5.05, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372444", "naam": "Botervloot", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 6.5, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372445", "naam": "Poeh fotolijstje", "categorie": "Fotolijstjes", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372446", "naam": "Minnie mouse beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372447", "naam": "Liefmans glazen mama", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372448", "naam": "Apenbeeldje", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372449", "naam": "4x Licor 43 glaasjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739372450", "naam": "Eierdopjes arcoroc", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-05-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-05-01", "notitie": ""}, {"id": "739403451", "naam": "5x Villeroy Boch Botanica", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 45.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403452", "naam": "Rieten wand element", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403453", "naam": "6 vogel schoteltjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403454", "naam": "Whinny the poo raam", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403455", "naam": "Paper making frame", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403456", "naam": "2x Jet kommen", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403457", "naam": "2x Chinese katten kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403458", "naam": "Groene glazen vaas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739403459", "naam": "Houten breinaaldenkoker", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-06-01", "prijsIn": 0.0, "prijsUit": 12.5, "status": "verkocht", "datumVerkoop": "2025-06-01", "notitie": ""}, {"id": "739433460", "naam": "Corendon vaas", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 8.5, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433461", "naam": "DE kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433462", "naam": "Bureaustoel", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 65.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433463", "naam": "2x Bacardi shotglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433464", "naam": "Rieten dienblad", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433465", "naam": "Blik AH", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 3.9, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433466", "naam": "Antiek inktpot", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433467", "naam": "Ladeknoppen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433468", "naam": "Kat tuindecoratie", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433469", "naam": "Placemats kopjes rechaud mandjes onderzetters borden", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 57.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433470", "naam": "2x dekseldoosjes Villeroy", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 18.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739433471", "naam": "Messenleggers", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2025-07-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2025-07-01", "notitie": ""}, {"id": "739464472", "naam": "Radio boxje", "categorie": "Elektronica & gadgets", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464473", "naam": "6 vogel schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464474", "naam": "Corneille bekers", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 14.05, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464475", "naam": "Boekje breien", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 1.95, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464476", "naam": "Kop schotel espresso", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464477", "naam": "Bakvorm varken beer", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 18.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464478", "naam": "Snoopy stropdas", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 15.01, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464479", "naam": "Duvel bierglas", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464480", "naam": "Notenkraker messing", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464481", "naam": "2x citruspers", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 13.5, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464482", "naam": "HEMA puzzel", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464483", "naam": "Wandbord kruiden", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 13.75, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464484", "naam": "Eierdopjes Libelle", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464485", "naam": "Kaasprikkers muis", "categorie": "Bestek & keukengerief", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739464486", "naam": "Messing wandhaak dames", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2025-08-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2025-08-01", "notitie": ""}, {"id": "739495487", "naam": "6x Friesche vlag koeien kopjes", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495488", "naam": "Starbucks koffie kopje", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495489", "naam": "Sun bird catcher", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495490", "naam": "Waxinelicht eekhoorntjes", "categorie": "Kaarsen & licht", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 6.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495491", "naam": "Christal palais champagne", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495492", "naam": "Pillendoosje", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495493", "naam": "3 funky glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739495494", "naam": "HEMA puzzel", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-09-01", "prijsIn": 0.0, "prijsUit": 1.5, "status": "verkocht", "datumVerkoop": "2025-09-01", "notitie": ""}, {"id": "739525495", "naam": "Nijntje beker", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525496", "naam": "3 keer geribbelde groene glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525497", "naam": "3 eierdopjes kippen", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 9.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525498", "naam": "Sjaalklem beer", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525499", "naam": "Boek inferno", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 2.5, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525500", "naam": "2x longdrink glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 14.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525501", "naam": "6x rookglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525502", "naam": "Harry Potter boek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525503", "naam": "Broche papegaai sjaalklem riem gespen", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 140.0, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739525504", "naam": "2x parelmoeren armbanden", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-10-01", "prijsIn": 0.0, "prijsUit": 8.55, "status": "verkocht", "datumVerkoop": "2025-10-01", "notitie": ""}, {"id": "739556505", "naam": "Riem", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556506", "naam": "Waterkan ritzenhoff", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 25.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556507", "naam": "Deurstopper beer", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556508", "naam": "Paarse ballen", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556509", "naam": "4 kristallen champagneglazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556510", "naam": "4 Suske Wiske schaaltjes", "categorie": "Borden & schalen", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 10.05, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556511", "naam": "H&M spijkerbroekje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 2.4, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556512", "naam": "2 whiskey glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556513", "naam": "Kattenkrabpaal", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556514", "naam": "Citruspers", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739556515", "naam": "Opblaasbad", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-11-01", "prijsIn": 0.0, "prijsUit": 40.0, "status": "verkocht", "datumVerkoop": "2025-11-01", "notitie": ""}, {"id": "739586516", "naam": "Fiets oma", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 50.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586517", "naam": "Kinderboek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 12.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586518", "naam": "Kattenkrab bol", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586519", "naam": "Mickey mok", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586520", "naam": "Zwarte bol glaasjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 30.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586521", "naam": "Kerstpuzzel", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 3.5, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586522", "naam": "Kapstok hondjes", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 8.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586523", "naam": "Tijdschriften Wes", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586524", "naam": "2x NS pin", "categorie": "Verzamelobjecten", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586525", "naam": "Rokje", "categorie": "Kleding & accessoires", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586526", "naam": "Twee thrillers", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 7.0, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739586527", "naam": "Plantenboek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2025-12-01", "prijsIn": 0.0, "prijsUit": 7.5, "status": "verkocht", "datumVerkoop": "2025-12-01", "notitie": ""}, {"id": "739676528", "naam": "Papier vaas", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2026-03-01", "prijsIn": 0.0, "prijsUit": 5.0, "status": "verkocht", "datumVerkoop": "2026-03-01", "notitie": ""}, {"id": "739676529", "naam": "Koffiefilter boerenbont", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2026-03-01", "prijsIn": 0.0, "prijsUit": 20.0, "status": "verkocht", "datumVerkoop": "2026-03-01", "notitie": ""}, {"id": "739676530", "naam": "Tuinboek", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2026-03-01", "prijsIn": 0.0, "prijsUit": 10.0, "status": "verkocht", "datumVerkoop": "2026-03-01", "notitie": ""}, {"id": "739676531", "naam": "Tuin hangstoel", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2026-03-01", "prijsIn": 0.0, "prijsUit": 30.0, "status": "verkocht", "datumVerkoop": "2026-03-01", "notitie": ""}, {"id": "739676532", "naam": "Gouden vaas", "categorie": "Planten & tuin", "winkel": "Kringloop", "datumInkoop": "2026-03-01", "prijsIn": 0.0, "prijsUit": 8.5, "status": "verkocht", "datumVerkoop": "2026-03-01", "notitie": ""}, {"id": "739707533", "naam": "Boek nieuws", "categorie": "Boeken & media", "winkel": "Kringloop", "datumInkoop": "2026-04-01", "prijsIn": 0.0, "prijsUit": 4.5, "status": "verkocht", "datumVerkoop": "2026-04-01", "notitie": ""}, {"id": "739737534", "naam": "Tinnen honkbal plaat", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2026-05-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2026-05-01", "notitie": ""}, {"id": "739737535", "naam": "Presse papier stier raamhanger", "categorie": "Decoratie & beeldjes", "winkel": "Kringloop", "datumInkoop": "2026-05-01", "prijsIn": 0.0, "prijsUit": 25.0, "status": "verkocht", "datumVerkoop": "2026-05-01", "notitie": ""}, {"id": "739737536", "naam": "2x zwarte Kosta Boda potjes", "categorie": "Overig", "winkel": "Kringloop", "datumInkoop": "2026-05-01", "prijsIn": 0.0, "prijsUit": 17.5, "status": "verkocht", "datumVerkoop": "2026-05-01", "notitie": ""}, {"id": "739737537", "naam": "Disaronno glazen", "categorie": "Glazen & servies", "winkel": "Kringloop", "datumInkoop": "2026-05-01", "prijsIn": 0.0, "prijsUit": 15.0, "status": "verkocht", "datumVerkoop": "2026-05-01", "notitie": ""}];
-
-function importHistorie() {
-  if (!confirm('Dit vervangt alle huidige data. Doorgaan?')) return;
-  items = HIST_DATA.slice();
-  items.sort(function(a,b) { return b.datumInkoop.localeCompare(a.datumInkoop); });
-  save();
-  renderList();
-  showToast('Geladen: ' + items.length + ' artikelen');
-}
-
-
-function exportJSON() {
-  if (!items.length) { showToast('Geen data om te exporteren'); return; }
-  const json = JSON.stringify(items, null, 2);
-  const blob = new Blob([json], { type: 'application/json' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = 'marktplaats_backup_' + new Date().toISOString().slice(0,10) + '.json';
-  a.click();
-  URL.revokeObjectURL(url);
-  showToast('Backup opgeslagen');
-}
-
-function importJSON(input) {
-  const file = input.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = function(e) {
-    try {
-      const data = JSON.parse(e.target.result);
-      if (!Array.isArray(data)) throw new Error('Ongeldig formaat');
-      if (!confirm(data.length + ' artikelen gevonden. Huidige data vervangen?')) return;
-      items = data;
-      save();
-      renderList();
-      showToast(items.length + ' artikelen hersteld');
-    } catch(err) {
-      alert('Fout bij importeren: ' + err.message);
-    }
-    input.value = '';
-  };
-  reader.readAsText(file);
-}
-
-// set today as default inkoop date
-document.getElementById('datum-inkoop').value = new Date().toISOString().slice(0,10);
-</script>
-
+<script src="app.js?v=6"></script>
 </body>
 </html>

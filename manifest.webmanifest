@@ -1,0 +1,12 @@
+{
+  "name": "Marktplaats Tracker",
+  "short_name": "MP Tracker",
+  "description": "Houd je in- en verkoop bij en zie je winst in één oogopslag.",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#0c1019",
+  "theme_color": "#ef5b46",
+  "icons": [
+    { "src": "icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any maskable" }
+  ]
+}

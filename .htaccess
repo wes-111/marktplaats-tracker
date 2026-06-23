@@ -1,0 +1,27 @@
+# Blokkeer directe toegang tot gevoelige bestanden
+<FilesMatch "\.(sql|md)$">
+    Require all denied
+</FilesMatch>
+
+<Files "config.php">
+    Require all denied
+</Files>
+
+<Files "config.example.php">
+    Require all denied
+</Files>
+
+<Files "bootstrap.php">
+    Require all denied
+</Files>
+
+<Files "db.php">
+    Require all denied
+</Files>
+
+<Files "item_helpers.php">
+    Require all denied
+</Files>
+
+# Geen directory listing
+Options -Indexes
