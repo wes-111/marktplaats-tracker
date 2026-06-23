@@ -19,5 +19,9 @@
     Require all denied
 </Files>
 
+<Files "item_helpers.php">
+    Require all denied
+</Files>
+
 # Geen directory listing
 Options -Indexes

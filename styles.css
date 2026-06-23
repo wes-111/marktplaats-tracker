@@ -381,6 +381,186 @@ select {
   border-color: var(--text);
 }
 
+/* ---------- Search ---------- */
+.searchbar {
+  position: relative;
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.searchbar > svg {
+  position: absolute;
+  left: 14px;
+  width: 18px;
+  height: 18px;
+  color: var(--faint);
+  pointer-events: none;
+}
+.searchbar input {
+  padding-left: 42px;
+  padding-right: 40px;
+}
+.searchbar input::-webkit-search-cancel-button { display: none; }
+.search-clear {
+  position: absolute;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  border: none;
+  background: var(--surface-2);
+  color: var(--muted);
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 13px;
+  display: grid;
+  place-items: center;
+}
+.search-clear:hover { color: var(--text); }
+
+.list-meta {
+  font-size: 0.76rem;
+  color: var(--faint);
+  font-weight: 600;
+  margin: 0 2px 10px;
+}
+
+/* ---------- Sorteren & categoriefilter ---------- */
+.list-tools {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.list-tools select {
+  flex: 1;
+  min-width: 0;
+  padding: 9px 30px 9px 12px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  border-radius: 10px;
+  background-position: right 10px center;
+}
+
+/* ---------- Stale-badge & verkocht-banner ---------- */
+.stale-badge {
+  display: inline-block;
+  margin-bottom: 8px;
+  padding: 3px 9px;
+  border-radius: 999px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+.item.flagged { border-color: color-mix(in srgb, var(--violet) 45%, var(--border)); }
+.sold-banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  background: var(--violet-soft);
+  color: var(--violet);
+  border-radius: 9px;
+  padding: 8px 11px;
+  margin-bottom: 11px;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+.link-btn {
+  border: none;
+  background: var(--violet);
+  color: #fff;
+  border-radius: 7px;
+  padding: 4px 10px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  font-family: var(--font);
+  cursor: pointer;
+}
+
+/* mini-btn als link (advertentie openen) + 'verkocht'-knop */
+a.mini-btn { text-decoration: none; }
+.mini-btn.ok { color: var(--green); }
+.mini-btn.ok:hover { background: var(--green-soft); border-color: transparent; }
+
+/* ---------- Per jaar ---------- */
+.jaar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 2px;
+  border-bottom: 1px solid var(--border);
+}
+.jaar-row:last-child { border-bottom: none; }
+.jaar-label { font-weight: 800; font-size: 1.05rem; letter-spacing: -0.02em; }
+
+/* ---------- Actiemenu ---------- */
+.item { cursor: pointer; }
+.item-chevron { color: var(--faint); display: flex; align-items: center; flex-shrink: 0; }
+
+.action-list { display: flex; flex-direction: column; gap: 8px; }
+.action-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 16px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius-sm);
+  background: var(--surface-2);
+  color: var(--text);
+  font-size: 1rem;
+  font-weight: 600;
+  font-family: var(--font);
+  text-align: left;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+}
+.action-btn span { font-size: 1.15rem; width: 24px; text-align: center; }
+.action-btn:hover { border-color: var(--border-strong); }
+.action-btn:active { transform: scale(0.99); }
+.action-btn.danger { color: var(--red); }
+.action-btn.danger:hover { background: var(--red-soft); border-color: transparent; }
+
+/* ---------- Foto-thumbnail op de kaart ---------- */
+.item-head { display: flex; gap: 12px; align-items: flex-start; }
+.item-headtext { flex: 1; min-width: 0; }
+.item-foto {
+  width: 60px;
+  height: 60px;
+  border-radius: 11px;
+  object-fit: cover;
+  flex-shrink: 0;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+}
+
+/* ---------- Maanddoel-voortgangsbalk ---------- */
+.goalbar-wrap { margin-bottom: 14px; }
+.goalbar-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+  font-size: 0.88rem;
+  font-weight: 700;
+}
+.goalbar-top i { font-style: normal; }
+.goal-sub { color: var(--muted); font-weight: 500; font-size: 0.78rem; }
+.goalbar {
+  height: 12px;
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.goalbar-fill {
+  height: 100%;
+  width: 0;
+  background: linear-gradient(90deg, var(--accent), var(--accent-ink));
+  border-radius: 999px;
+  transition: width 0.4s ease;
+}
+
 /* ---------- Item cards ---------- */
 .item {
   background: var(--surface);

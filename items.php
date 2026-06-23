@@ -1,6 +1,7 @@
 <?php
 require __DIR__ . '/bootstrap.php';
 require __DIR__ . '/db.php';
+require __DIR__ . '/item_helpers.php';
 
 require_auth();
 
@@ -88,84 +89,4 @@ switch ($method) {
 
     default:
         respond(['error' => 'Methode niet toegestaan'], 405);
-}
-
-// ---------------------------------------------------------------------------
-
-/** Normaliseer binnenkomende JSON naar een schoon item-array. */
-function normalize_item(array $raw, bool $keepGivenId): array
-{
-    $id = isset($raw['id']) ? (string) $raw['id'] : '';
-    if ($id === '' || !$keepGivenId && $id === '') {
-        $id = gen_id();
-    }
-    if ($id === '') {
-        $id = gen_id();
-    }
-
-    $status = (string) ($raw['status'] ?? 'te-koop');
-    $allowed = ['te-koop', 'gereserveerd', 'verkocht'];
-    if (!in_array($status, $allowed, true)) {
-        $status = 'te-koop';
-    }
-
-    return [
-        'id'           => $id,
-        'naam'         => trim((string) ($raw['naam'] ?? '')),
-        'categorie'    => trim((string) ($raw['categorie'] ?? '')),
-        'winkel'       => trim((string) ($raw['winkel'] ?? '')),
-        'datumInkoop'  => nullable_date($raw['datumInkoop'] ?? ''),
-        'prijsIn'      => (float) ($raw['prijsIn'] ?? 0),
-        'prijsUit'     => (float) ($raw['prijsUit'] ?? 0),
-        'status'       => $status,
-        'datumVerkoop' => nullable_date($raw['datumVerkoop'] ?? ''),
-        'notitie'      => trim((string) ($raw['notitie'] ?? '')),
-    ];
-}
-
-/** Voeg toe of werk bij (op id). */
-function upsert_item(PDO $pdo, array $i): void
-{
-    $stmt = $pdo->prepare(
-        'INSERT INTO items
-            (id, naam, categorie, winkel, datum_inkoop, prijs_in, prijs_uit, status, datum_verkoop, notitie)
-         VALUES
-            (:id, :naam, :categorie, :winkel, :datum_inkoop, :prijs_in, :prijs_uit, :status, :datum_verkoop, :notitie)
-         ON DUPLICATE KEY UPDATE
-            naam = VALUES(naam),
-            categorie = VALUES(categorie),
-            winkel = VALUES(winkel),
-            datum_inkoop = VALUES(datum_inkoop),
-            prijs_in = VALUES(prijs_in),
-            prijs_uit = VALUES(prijs_uit),
-            status = VALUES(status),
-            datum_verkoop = VALUES(datum_verkoop),
-            notitie = VALUES(notitie)'
-    );
-    $stmt->execute([
-        ':id'            => $i['id'],
-        ':naam'          => $i['naam'],
-        ':categorie'     => $i['categorie'] !== '' ? $i['categorie'] : null,
-        ':winkel'        => $i['winkel'] !== '' ? $i['winkel'] : null,
-        ':datum_inkoop'  => $i['datumInkoop'],
-        ':prijs_in'      => $i['prijsIn'],
-        ':prijs_uit'     => $i['prijsUit'],
-        ':status'        => $i['status'],
-        ':datum_verkoop' => $i['datumVerkoop'],
-        ':notitie'       => $i['notitie'] !== '' ? $i['notitie'] : null,
-    ]);
-}
-
-function fetch_item(PDO $pdo, string $id): ?array
-{
-    $stmt = $pdo->prepare('SELECT * FROM items WHERE id = ?');
-    $stmt->execute([$id]);
-    $row = $stmt->fetch();
-    return $row ? row_to_item($row) : null;
-}
-
-/** Genereer een uniek id in dezelfde stijl als de oude app (tijd in ms). */
-function gen_id(): string
-{
-    return (string) (int) (microtime(true) * 1000) . random_int(100, 999);
 }

@@ -1,8 +1,14 @@
 # Geheime configuratie — NOOIT committen
 config.php
 
-# Deploy-zip
-rachelle-mp-tracker.zip
+# Deploy-zips + uitgepakte kopieën
+*.zip
+update-zoekbalk/
+
+# Persoonlijke (verkoop)data — niet naar publieke repo
+_import/
+marktplaats_import.json
+marktplaats_tekoop.json
 
 # OS / editor / tooling
 .DS_Store

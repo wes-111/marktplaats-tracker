@@ -6,15 +6,36 @@ const API = '';
 const CATEGORIES = ['Kleding', 'Meubels', 'Decoratie', 'Keuken', 'Speelgoed',
   'Elektronica', 'Boeken', 'Sieraden / Accessoires', 'Kunst', 'Overig'];
 
+const STALE_DAYS = 60; // na hoeveel dagen 'te koop' een advertentie als 'lang te koop' geldt
+
 const state = {
   items: [],
   filter: 'alle',
+  search: '',
+  sort: 'nieuw',
+  category: 'alle',
 };
 
 const $ = (id) => document.getElementById(id);
 const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) =>
   ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
 const fmt = (n) => '€ ' + Number(n || 0).toFixed(2).replace('.', ',');
+
+/* ---------- Datum-helpers ---------- */
+const dateOnly = (s) => (s ? String(s).slice(0, 10) : '');
+const listingDate = (i) => dateOnly(i.onlineSinds) || dateOnly(i.aangemaakt) || '';
+const daysSince = (d) => {
+  if (!d) return null;
+  const ms = Date.now() - new Date(d + 'T00:00:00').getTime();
+  return Math.floor(ms / 86400000);
+};
+const fmtDateNL = (s) => {
+  const d = dateOnly(s);
+  if (!d) return '';
+  const [y, m, da] = d.split('-');
+  return `${da}-${m}-${y}`;
+};
+const today = () => new Date().toISOString().slice(0, 10);
 
 /* ---------- API helper ---------- */
 async function api(path, opts = {}) {
@@ -132,6 +153,8 @@ function fillCategories() {
     CATEGORIES.map((c) => `<option>${c}</option>`).join('');
   $('categorie').innerHTML = opts;
   $('edit-categorie').innerHTML = opts;
+  $('cat-filter').innerHTML = '<option value="alle">Alle categorieën</option>' +
+    CATEGORIES.map((c) => `<option value="${c}">${c}</option>`).join('');
 }
 
 /* ---------- Winst-preview ---------- */
@@ -163,6 +186,7 @@ async function saveItem() {
     status: $('status').value,
     datumVerkoop: $('datum-verkoop').value,
     notitie: $('notitie').value.trim(),
+    advertentieUrl: $('link').value.trim(),
   };
   try {
     const r = await api('items.php', { method: 'POST', body: JSON.stringify(payload) });
@@ -179,7 +203,7 @@ async function saveItem() {
 }
 
 function resetForm() {
-  ['naam', 'winkel', 'notitie', 'prijs-in', 'prijs-uit', 'datum-verkoop'].forEach((id) => ($(id).value = ''));
+  ['naam', 'winkel', 'notitie', 'prijs-in', 'prijs-uit', 'datum-verkoop', 'link'].forEach((id) => ($(id).value = ''));
   $('categorie').value = '';
   $('status').value = 'te-koop';
   $('profit').classList.remove('show');
@@ -187,50 +211,134 @@ function resetForm() {
 }
 
 /* ---------- Lijst renderen ---------- */
+const itemDate = (i) => i.datumVerkoop || i.datumInkoop || '';
+const idNum = (id) => { const m = String(id).match(/(\d+)/); return m ? parseInt(m[1], 10) : 0; };
+
+function sortComparator(a, b) {
+  switch (state.sort) {
+    case 'oud': {
+      const da = itemDate(a) || '0000-00-00';
+      const db = itemDate(b) || '0000-00-00';
+      if (da !== db) return da.localeCompare(db);
+      return idNum(a.id) - idNum(b.id);
+    }
+    case 'prijs-hoog': return (b.prijsUit || 0) - (a.prijsUit || 0);
+    case 'prijs-laag': return (a.prijsUit || 0) - (b.prijsUit || 0);
+    case 'winst':
+      return ((b.prijsUit || 0) - (b.prijsIn || 0)) - ((a.prijsUit || 0) - (a.prijsIn || 0));
+    case 'langst': {
+      const la = listingDate(a) || '9999-99-99';
+      const lb = listingDate(b) || '9999-99-99';
+      if (la !== lb) return la.localeCompare(lb);
+      return idNum(a.id) - idNum(b.id);
+    }
+    case 'nieuw':
+    default: {
+      const da = itemDate(a) || '9999-99-99';
+      const db = itemDate(b) || '9999-99-99';
+      if (da !== db) return db.localeCompare(da);
+      return idNum(a.id) - idNum(b.id);
+    }
+  }
+}
+
 function renderList() {
   const list = $('items-list');
-  const items = state.filter === 'alle'
-    ? state.items
+  const q = state.search;
+
+  let items = state.filter === 'alle'
+    ? state.items.slice()
     : state.items.filter((i) => i.status === state.filter);
 
+  if (state.category !== 'alle') {
+    items = items.filter((i) => (i.categorie || 'Overig') === state.category);
+  }
+
+  if (q) {
+    items = items.filter((i) =>
+      [i.naam, i.categorie, i.winkel, i.notitie].some((v) => (v || '').toLowerCase().includes(q)));
+  }
+
+  items.sort(sortComparator);
+
+  $('list-count').textContent = items.length
+    ? `${items.length} ${items.length === 1 ? 'artikel' : 'artikelen'}${q ? ' gevonden' : ''}`
+    : '';
+
   if (!items.length) {
-    list.innerHTML = `<div class="empty"><div class="ico">📭</div><p>Nog geen artikelen hier</p></div>`;
+    list.innerHTML = q
+      ? `<div class="empty"><div class="ico">🔍</div><p>Geen resultaten voor “${esc(q)}”</p></div>`
+      : `<div class="empty"><div class="ico">📭</div><p>Nog geen artikelen hier</p></div>`;
     return;
   }
 
   const label = { verkocht: 'Verkocht', 'te-koop': 'Te koop', gereserveerd: 'Gereserveerd' };
 
   list.innerHTML = items.map((item) => {
+    const verkocht = item.status === 'verkocht';
     const winst = (item.prijsUit || 0) - (item.prijsIn || 0);
+
     const meta = [];
     if (item.categorie) meta.push(`<span>📂 ${esc(item.categorie)}</span>`);
     if (item.winkel) meta.push(`<span>📍 ${esc(item.winkel)}</span>`);
-    if (item.datumInkoop) meta.push(`<span>🗓️ ${esc(item.datumInkoop)}</span>`);
+    if (item.onlineSinds) meta.push(`<span>🗓️ online sinds ${fmtDateNL(item.onlineSinds)}</span>`);
+    else if (item.datumInkoop) meta.push(`<span>🗓️ ${esc(item.datumInkoop)}</span>`);
+    if (item.weergaven != null) meta.push(`<span>👁 ${item.weergaven}</span>`);
+    if (item.bewaard != null) meta.push(`<span>❤ ${item.bewaard}</span>`);
 
-    const winstHtml = item.prijsUit
-      ? `<span class="winst ${winst >= 0 ? 'pos' : 'neg'} tnum">${winst >= 0 ? '+' : ''}${fmt(winst)}</span>`
-      : `<span class="price-line">nog niet verkocht</span>`;
+    let staleHtml = '';
+    if (item.status === 'te-koop') {
+      const d = daysSince(listingDate(item));
+      if (d != null && d > STALE_DAYS) staleHtml = `<span class="stale-badge">⏳ ${d} dagen te koop</span>`;
+    }
 
-    return `<div class="item ${item.status}">
-      <div class="item-top">
-        <div class="item-name">${esc(item.naam)}</div>
-        <span class="badge ${item.status}">${label[item.status] || esc(item.status)}</span>
+    const banner = item.vermoedelijkVerkocht
+      ? `<div class="sold-banner">Staat niet meer op Marktplaats — verkocht? <button class="link-btn" onclick="event.stopPropagation(); openSold('${item.id}')">Markeer verkocht</button></div>`
+      : '';
+
+    let footLeft, footRight;
+    if (verkocht) {
+      footLeft = `In: <strong class="tnum">${fmt(item.prijsIn)}</strong> · Uit: <strong class="tnum">${fmt(item.prijsUit)}</strong>`;
+      footRight = `<span class="winst ${winst >= 0 ? 'pos' : 'neg'} tnum">${winst >= 0 ? '+' : ''}${fmt(winst)}</span>`;
+    } else if (item.prijsUit) {
+      footLeft = 'Vraagprijs';
+      footRight = `<span class="winst tnum" style="color:var(--text)">${fmt(item.prijsUit)}</span>`;
+    } else {
+      footLeft = 'Prijs';
+      footRight = `<span class="price-line">Bieden</span>`;
+    }
+
+    const fotoHtml = item.fotoUrl
+      ? `<img class="item-foto" src="${esc(item.fotoUrl)}" loading="lazy" alt="" onerror="this.style.display='none'">`
+      : '';
+
+    return `<div class="item ${item.status}${item.vermoedelijkVerkocht ? ' flagged' : ''}" onclick="openActions('${item.id}')" role="button" tabindex="0">
+      <div class="item-head">
+        ${fotoHtml}
+        <div class="item-headtext">
+          <div class="item-top">
+            <div class="item-name">${esc(item.naam)}</div>
+            <span class="badge ${item.status}">${label[item.status] || esc(item.status)}</span>
+          </div>
+          ${staleHtml}
+          ${meta.length ? `<div class="item-meta">${meta.join('')}</div>` : ''}
+        </div>
       </div>
-      ${meta.length ? `<div class="item-meta">${meta.join('')}</div>` : ''}
       ${item.notitie ? `<div class="item-note">${esc(item.notitie)}</div>` : ''}
+      ${banner}
       <div class="item-foot">
         <div>
-          <div class="price-line">In: <strong class="tnum">${fmt(item.prijsIn)}</strong>${item.prijsUit ? ` · Uit: <strong class="tnum">${fmt(item.prijsUit)}</strong>` : ''}</div>
-          ${winstHtml}
+          <div class="price-line">${footLeft}</div>
+          ${footRight}
         </div>
-        <div class="item-actions">
-          <button class="mini-btn" onclick="editItem('${item.id}')" title="Bewerken">✏️</button>
-          <button class="mini-btn del" onclick="deleteItem('${item.id}')" title="Verwijderen">🗑️</button>
-        </div>
+        <span class="item-chevron" aria-hidden="true"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg></span>
       </div>
     </div>`;
   }).join('');
 }
+
+function setSort(v) { state.sort = v; renderList(); }
+function setCategory(v) { state.category = v; renderList(); }
 
 function setFilter(f, btn) {
   state.filter = f;
@@ -253,6 +361,8 @@ function editItem(id) {
   $('edit-status').value = item.status;
   $('edit-datum-verkoop').value = item.datumVerkoop || '';
   $('edit-notitie').value = item.notitie || '';
+  $('edit-link').value = item.advertentieUrl || '';
+  $('edit-foto').value = item.fotoUrl || '';
   openSheet('edit-overlay');
 }
 
@@ -262,7 +372,9 @@ async function saveEdit() {
   if (!naam) { toast('Vul eerst een artikelnaam in'); return; }
   const btn = $('edit-save');
   btn.disabled = true;
+  const base = state.items.find((i) => i.id === id) || {};
   const payload = {
+    ...base, // behoud mpId, onlineSinds, weergaven, bewaard, vermoedelijkVerkocht
     naam,
     categorie: $('edit-categorie').value,
     winkel: $('edit-winkel').value.trim(),
@@ -272,6 +384,8 @@ async function saveEdit() {
     status: $('edit-status').value,
     datumVerkoop: $('edit-datum-verkoop').value,
     notitie: $('edit-notitie').value.trim(),
+    advertentieUrl: $('edit-link').value.trim(),
+    fotoUrl: $('edit-foto').value.trim(),
   };
   try {
     const r = await api('items.php?id=' + encodeURIComponent(id), {
@@ -304,6 +418,90 @@ async function deleteItem(id) {
   }
 }
 
+/* ---------- Actiemenu (tik op kaart) ---------- */
+let actionsId = null;
+function openActions(id) {
+  const item = state.items.find((i) => i.id === id);
+  if (!item) return;
+  actionsId = id;
+  $('actions-naam').textContent = item.naam;
+  $('act-sold').classList.toggle('hidden', item.status === 'verkocht');
+  $('act-link').classList.toggle('hidden', !item.advertentieUrl);
+  openSheet('actions-overlay');
+}
+
+/* ---------- Snel verkocht ---------- */
+function openSold(id) {
+  const item = state.items.find((i) => i.id === id);
+  if (!item) return;
+  $('sold-id').value = id;
+  $('sold-naam').textContent = item.naam;
+  $('sold-prijs').value = item.prijsUit || '';
+  $('sold-datum').value = today();
+  openSheet('sold-overlay');
+  setTimeout(() => $('sold-prijs').focus(), 60);
+}
+
+async function saveSold() {
+  const id = $('sold-id').value;
+  const base = state.items.find((i) => i.id === id);
+  if (!base) return;
+  const btn = $('sold-save');
+  btn.disabled = true;
+  const payload = {
+    ...base,
+    status: 'verkocht',
+    prijsUit: parseFloat($('sold-prijs').value) || 0,
+    datumVerkoop: $('sold-datum').value || today(),
+    vermoedelijkVerkocht: false,
+  };
+  try {
+    const r = await api('items.php?id=' + encodeURIComponent(id), { method: 'PUT', body: JSON.stringify(payload) });
+    const idx = state.items.findIndex((i) => i.id === id);
+    if (idx > -1) state.items[idx] = r.item;
+    closeSheet('sold-overlay');
+    toast('✓ Verkocht: ' + base.naam);
+    renderList();
+    renderStats();
+  } catch (ex) {
+    toast(ex.message);
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+/* ---------- Advertentietekst-generator ---------- */
+function buildAdText(item) {
+  const lines = [];
+  lines.push(item.naam);
+  lines.push('');
+  if (item.notitie) { lines.push(item.notitie); lines.push(''); }
+  lines.push(item.prijsUit ? `Vraagprijs: ${fmt(item.prijsUit)}` : 'Prijs: bieden');
+  if (item.categorie) lines.push(`Categorie: ${item.categorie}`);
+  lines.push('');
+  lines.push('Ophalen of verzenden mogelijk. Bekijk ook mijn andere advertenties!');
+  return lines.join('\n');
+}
+
+function openAdText(id) {
+  const item = state.items.find((i) => i.id === id);
+  if (!item) return;
+  $('adtext-content').value = buildAdText(item);
+  openSheet('adtext-overlay');
+}
+
+function copyAdText() {
+  const text = $('adtext-content').value;
+  const done = () => toast('✓ Tekst gekopieerd');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(done).catch(() => {
+      $('adtext-content').select(); document.execCommand('copy'); done();
+    });
+  } else {
+    $('adtext-content').select(); document.execCommand('copy'); done();
+  }
+}
+
 /* ---------- Statistieken ---------- */
 function renderStats() {
   const items = state.items;
@@ -322,8 +520,85 @@ function renderStats() {
   $('s-winst').textContent = (winst >= 0 ? '+' : '') + fmt(winst);
   $('s-winst-sub').textContent = `${verkocht.length} verkocht · ${fmt(omzet)} omzet`;
 
+  // --- extra statistieken ---
+  const aantalV = verkocht.length;
+  $('s-gem-prijs').textContent = fmt(aantalV ? omzet / aantalV : 0);
+  $('s-gem-marge').textContent = fmt(aantalV ? winst / aantalV : 0);
+
+  const teKoop = items.filter((i) => i.status === 'te-koop');
+  $('s-aanbod').textContent = fmt(teKoop.reduce((s, i) => s + (i.prijsUit || 0), 0));
+  const staleCount = teKoop.filter((i) => {
+    const d = daysSince(listingDate(i));
+    return d != null && d > STALE_DAYS;
+  }).length;
+  $('s-stale').textContent = staleCount;
+
+  const looptijden = verkocht.map((i) => {
+    const l = listingDate(i);
+    const v = dateOnly(i.datumVerkoop);
+    if (!l || !v || l > v) return null;
+    return Math.round((new Date(v + 'T00:00:00') - new Date(l + 'T00:00:00')) / 86400000);
+  }).filter((d) => d != null);
+  const gemLooptijd = looptijden.length ? Math.round(looptijden.reduce((a, b) => a + b, 0) / looptijden.length) : null;
+  $('s-doorlooptijd').textContent = gemLooptijd != null ? gemLooptijd + ' dagen' : 'n.v.t.';
+
+  const catOmzet = {};
+  verkocht.forEach((i) => { const c = i.categorie || 'Overig'; catOmzet[c] = (catOmzet[c] || 0) + (i.prijsUit || 0); });
+  const beste = Object.entries(catOmzet).sort((a, b) => b[1] - a[1])[0];
+  $('s-beste-cat').textContent = beste ? beste[0] : '—';
+  $('s-beste-cat-sub').textContent = beste ? fmt(beste[1]) + ' omzet' : '';
+
+  renderGoal();
+  renderJaar();
   renderMaand();
   renderCategorie();
+}
+
+/* ---------- Maanddoel ---------- */
+function getGoal() {
+  let g = 0;
+  try { g = parseFloat(localStorage.getItem('mp_goal')); } catch (_) {}
+  return g > 0 ? g : 0;
+}
+
+function renderGoal() {
+  const wrap = $('goalbar-wrap');
+  if (!wrap) return;
+  const goal = getGoal();
+  if (!goal) { wrap.classList.add('hidden'); return; }
+  wrap.classList.remove('hidden');
+  const maand = new Date().toISOString().slice(0, 7);
+  const omzet = state.items
+    .filter((i) => i.status === 'verkocht' && dateOnly(i.datumVerkoop).slice(0, 7) === maand)
+    .reduce((s, i) => s + (i.prijsUit || 0), 0);
+  const pct = Math.min(100, Math.round((omzet / goal) * 100));
+  const rest = Math.max(0, goal - omzet);
+  $('goalbar-fill').style.width = pct + '%';
+  $('goal-label').textContent = `${fmt(omzet)} van ${fmt(goal)} · ${pct}%`;
+  $('goal-sub').textContent = rest > 0 ? `nog ${fmt(rest)} te gaan` : '🎉 doel gehaald!';
+}
+
+function renderJaar() {
+  const el = $('per-jaar');
+  if (!el) return;
+  const g = groupBy(state.items.filter((i) => i.status === 'verkocht'), (i) => {
+    const d = i.datumVerkoop;
+    return d ? d.slice(0, 4) : null;
+  });
+  const keys = Object.keys(g).sort((a, b) => b.localeCompare(a));
+  if (!keys.length) { el.innerHTML = `<p style="color:var(--muted);padding:14px 0;font-size:0.85rem">Nog geen data</p>`; return; }
+  el.innerHTML = keys.map((jaar) => {
+    const its = g[jaar];
+    const omzet = its.reduce((s, i) => s + (i.prijsUit || 0), 0);
+    const winst = its.reduce((s, i) => s + ((i.prijsUit || 0) - (i.prijsIn || 0)), 0);
+    return `<div class="jaar-row">
+      <div><span class="jaar-label">${jaar}</span> <span class="acc-sub">${its.length} verkocht</span></div>
+      <div style="text-align:right">
+        <div class="tnum" style="font-weight:700">${fmt(omzet)}</div>
+        <div class="winst ${winst >= 0 ? 'pos' : 'neg'} tnum" style="font-size:0.8rem">${winst >= 0 ? '+' : ''}${fmt(winst)} winst</div>
+      </div>
+    </div>`;
+  }).join('');
 }
 
 const MAAND = ['jan', 'feb', 'mrt', 'apr', 'mei', 'jun', 'jul', 'aug', 'sep', 'okt', 'nov', 'dec'];
@@ -473,6 +748,26 @@ function migrateLocal() {
   bulkImport(arr, 'je oude browser-opslag');
 }
 
+/* ---------- Marktplaats-sync ---------- */
+async function syncMarktplaats() {
+  const btn = $('mp-sync-btn');
+  if (!confirm('Je actuele Marktplaats-aanbod ophalen en de tracker bijwerken?')) return;
+  const orig = btn.textContent;
+  btn.disabled = true;
+  btn.textContent = '⏳ Bezig met synchroniseren…';
+  try {
+    const r = await api('mp_sync.php', { method: 'POST' });
+    closeSheet('settings-overlay');
+    toast(`✓ ${r.gevonden} ads · ${r.toegevoegd} nieuw · ${r.prijs_bijgewerkt} prijs · ${r.vermoedelijk_verkocht} verkocht?`);
+    await loadItems();
+  } catch (ex) {
+    toast(ex.message === 'auth' ? 'Niet ingelogd' : ex.message);
+  } finally {
+    btn.disabled = false;
+    btn.textContent = orig;
+  }
+}
+
 /* ---------- Init ---------- */
 function init() {
   initTheme();
@@ -500,8 +795,41 @@ function init() {
   document.querySelectorAll('.chip').forEach((b) =>
     b.addEventListener('click', () => setFilter(b.dataset.f, b)));
 
+  // zoeken
+  const searchEl = $('search');
+  searchEl.addEventListener('input', () => {
+    state.search = searchEl.value.trim().toLowerCase();
+    $('search-clear').classList.toggle('hidden', !searchEl.value);
+    renderList();
+  });
+  $('search-clear').addEventListener('click', () => {
+    searchEl.value = '';
+    state.search = '';
+    $('search-clear').classList.add('hidden');
+    renderList();
+    searchEl.focus();
+  });
+
+  // sorteren & categoriefilter
+  $('sort').addEventListener('change', () => setSort($('sort').value));
+  $('cat-filter').addEventListener('change', () => setCategory($('cat-filter').value));
+
+  // actiemenu
+  $('act-edit').addEventListener('click', () => { closeSheet('actions-overlay'); editItem(actionsId); });
+  $('act-sold').addEventListener('click', () => { closeSheet('actions-overlay'); openSold(actionsId); });
+  $('act-link').addEventListener('click', () => {
+    const it = state.items.find((i) => i.id === actionsId);
+    if (it && it.advertentieUrl) window.open(it.advertentieUrl, '_blank', 'noopener');
+  });
+  $('act-adtext').addEventListener('click', () => { closeSheet('actions-overlay'); openAdText(actionsId); });
+  $('act-delete').addEventListener('click', () => { closeSheet('actions-overlay'); deleteItem(actionsId); });
+
   // edit
   $('edit-save').addEventListener('click', saveEdit);
+
+  // snel verkocht & advertentietekst
+  $('sold-save').addEventListener('click', saveSold);
+  $('adtext-copy').addEventListener('click', copyAdText);
 
   // settings actions
   $('export-json').addEventListener('click', exportJSON);
@@ -509,7 +837,16 @@ function init() {
   $('import-btn').addEventListener('click', () => $('import-file').click());
   $('import-file').addEventListener('change', function () { importFile(this); });
   $('migrate-btn').addEventListener('click', migrateLocal);
+  $('mp-sync-btn').addEventListener('click', syncMarktplaats);
   $('logout-btn').addEventListener('click', doLogout);
+
+  // maanddoel
+  const goalInput = $('goal-input');
+  try { goalInput.value = localStorage.getItem('mp_goal') || ''; } catch (_) {}
+  goalInput.addEventListener('input', () => {
+    try { localStorage.setItem('mp_goal', goalInput.value); } catch (_) {}
+    renderGoal();
+  });
 
   // close sheets
   document.querySelectorAll('[data-close]').forEach((b) =>

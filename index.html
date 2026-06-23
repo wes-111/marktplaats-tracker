@@ -12,7 +12,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="styles.css?v=6">
 </head>
 <body>
 
@@ -98,6 +98,10 @@
           <label for="notitie">Notitie</label>
           <textarea id="notitie" placeholder="Bijzonderheden, conditie, afspraken…"></textarea>
         </div>
+        <div class="field">
+          <label for="link">Advertentielink (Marktplaats)</label>
+          <input type="url" id="link" placeholder="https://www.marktplaats.nl/v/…" autocomplete="off" inputmode="url">
+        </div>
 
         <div class="profit" id="profit">
           <span class="lbl" id="profit-lbl">Winst</span>
@@ -110,17 +114,41 @@
 
     <!-- ---------- OVERZICHT ---------- -->
     <section class="view" id="view-list">
+      <div class="searchbar">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="search" id="search" placeholder="Zoek op naam, categorie of winkel…" autocomplete="off">
+        <button type="button" class="search-clear hidden" id="search-clear" aria-label="Wissen">✕</button>
+      </div>
       <div class="filters" id="filters">
         <button class="chip active" data-f="alle">Alle</button>
         <button class="chip" data-f="te-koop">Te koop</button>
         <button class="chip" data-f="gereserveerd">Gereserveerd</button>
         <button class="chip" data-f="verkocht">Verkocht</button>
       </div>
+      <div class="list-tools">
+        <select id="sort" aria-label="Sorteren">
+          <option value="nieuw">Nieuwste eerst</option>
+          <option value="oud">Oudste eerst</option>
+          <option value="prijs-hoog">Prijs hoog → laag</option>
+          <option value="prijs-laag">Prijs laag → hoog</option>
+          <option value="winst">Winst hoog → laag</option>
+          <option value="langst">Langst te koop</option>
+        </select>
+        <select id="cat-filter" aria-label="Categorie"></select>
+      </div>
+      <div class="list-meta" id="list-count"></div>
       <div id="items-list"></div>
     </section>
 
     <!-- ---------- STATISTIEKEN ---------- -->
     <section class="view" id="view-stats">
+      <div class="goalbar-wrap hidden" id="goalbar-wrap">
+        <div class="goalbar-top">
+          <span><i>🎯</i> <span id="goal-label"></span></span>
+          <span class="goal-sub" id="goal-sub"></span>
+        </div>
+        <div class="goalbar"><div class="goalbar-fill" id="goalbar-fill"></div></div>
+      </div>
       <div class="stat hero" style="margin-bottom:12px">
         <div class="k">💰 Totale winst</div>
         <div class="v tnum" id="s-winst">€ 0,00</div>
@@ -131,8 +159,17 @@
         <div class="stat"><div class="k">✅ Verkocht</div><div class="v tnum" id="s-verkocht">0</div></div>
         <div class="stat"><div class="k">🛍️ Totale inkoop</div><div class="v tnum" id="s-inkoop">€ 0,00</div></div>
         <div class="stat"><div class="k">📈 Omzet</div><div class="v tnum" id="s-omzet">€ 0,00</div></div>
+        <div class="stat"><div class="k">🧮 Gem. verkoopprijs</div><div class="v tnum" id="s-gem-prijs">€ 0,00</div></div>
+        <div class="stat"><div class="k">💸 Gem. winst</div><div class="v tnum" id="s-gem-marge">€ 0,00</div></div>
+        <div class="stat"><div class="k">⏱️ Gem. doorlooptijd</div><div class="v tnum" id="s-doorlooptijd">n.v.t.</div></div>
+        <div class="stat"><div class="k">⏳ Lang te koop</div><div class="v tnum" id="s-stale">0</div></div>
+        <div class="stat"><div class="k">🏆 Beste categorie</div><div class="v" id="s-beste-cat" style="font-size:1.1rem">—</div><div class="sub" id="s-beste-cat-sub" style="color:var(--muted);font-size:0.75rem"></div></div>
         <div class="stat span"><div class="k">🏷️ Voorraadwaarde (inkoop, nog niet verkocht)</div><div class="v tnum" id="s-voorraad">€ 0,00</div></div>
+        <div class="stat span"><div class="k">🛒 Aanbodwaarde (vraagprijs, nu te koop)</div><div class="v tnum" id="s-aanbod">€ 0,00</div></div>
       </div>
+
+      <div class="section-title">Per jaar</div>
+      <div class="card pad" style="padding:6px 18px;margin-bottom:16px"><div id="per-jaar"></div></div>
 
       <div class="section-title">Per maand</div>
       <div class="card pad" style="padding:6px 18px;margin-bottom:16px"><div id="per-maand"></div></div>
@@ -157,6 +194,24 @@
       Stats
     </button>
   </nav>
+</div>
+
+<!-- ============ ACTIEMENU SHEET ============ -->
+<div class="overlay" id="actions-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2 id="actions-naam" style="font-size:1.05rem">Artikel</h2>
+      <button class="icon-btn" data-close="actions-overlay">✕</button>
+    </div>
+    <div class="action-list">
+      <button class="action-btn" id="act-edit"><span>✏️</span> Bewerken</button>
+      <button class="action-btn" id="act-sold"><span>✓</span> Markeer verkocht</button>
+      <button class="action-btn" id="act-link"><span>🔗</span> Open op Marktplaats</button>
+      <button class="action-btn" id="act-adtext"><span>📝</span> Advertentietekst</button>
+      <button class="action-btn danger" id="act-delete"><span>🗑️</span> Verwijderen</button>
+    </div>
+  </div>
 </div>
 
 <!-- ============ EDIT SHEET ============ -->
@@ -212,7 +267,55 @@
       <label for="edit-notitie">Notitie</label>
       <textarea id="edit-notitie"></textarea>
     </div>
+    <div class="field">
+      <label for="edit-link">Advertentielink (Marktplaats)</label>
+      <input type="url" id="edit-link" placeholder="https://www.marktplaats.nl/v/…" inputmode="url">
+    </div>
+    <div class="field">
+      <label for="edit-foto">Foto-URL (optioneel)</label>
+      <input type="url" id="edit-foto" placeholder="https://…/foto.jpg" inputmode="url">
+    </div>
     <button class="btn btn-primary" id="edit-save" style="margin-top:18px">Wijzigingen opslaan</button>
+  </div>
+</div>
+
+<!-- ============ SNEL VERKOCHT SHEET ============ -->
+<div class="overlay" id="sold-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Markeer als verkocht</h2>
+      <button class="icon-btn" data-close="sold-overlay">✕</button>
+    </div>
+    <input type="hidden" id="sold-id">
+    <p style="color:var(--muted);font-size:0.9rem;margin-bottom:4px" id="sold-naam"></p>
+    <div class="grid-2">
+      <div class="field">
+        <label for="sold-prijs">Verkoopprijs</label>
+        <div class="input-prefix"><span>€</span><input type="number" id="sold-prijs" step="0.01" min="0" inputmode="decimal"></div>
+      </div>
+      <div class="field">
+        <label for="sold-datum">Datum verkoop</label>
+        <input type="date" id="sold-datum">
+      </div>
+    </div>
+    <button class="btn btn-primary" id="sold-save" style="margin-top:18px">✓ Markeer als verkocht</button>
+  </div>
+</div>
+
+<!-- ============ ADVERTENTIETEKST SHEET ============ -->
+<div class="overlay" id="adtext-overlay">
+  <div class="sheet">
+    <div class="sheet-grip"></div>
+    <div class="sheet-head">
+      <h2>Advertentietekst</h2>
+      <button class="icon-btn" data-close="adtext-overlay">✕</button>
+    </div>
+    <p style="color:var(--muted);font-size:0.82rem;margin-bottom:10px">Pas aan naar wens en kopieer naar Marktplaats.</p>
+    <div class="field">
+      <textarea id="adtext-content" style="min-height:200px"></textarea>
+    </div>
+    <button class="btn btn-primary" id="adtext-copy" style="margin-top:6px">📋 Kopieer tekst</button>
   </div>
 </div>
 
@@ -225,7 +328,20 @@
       <button class="icon-btn" data-close="settings-overlay">✕</button>
     </div>
 
-    <div class="section-title" style="margin-top:4px">Data</div>
+    <div class="section-title" style="margin-top:4px">Marktplaats</div>
+    <div class="card pad stack">
+      <button class="btn btn-primary" id="mp-sync-btn">🔄 Sync met Marktplaats</button>
+      <p style="font-size:0.74rem;color:var(--muted);margin:0">Haalt je actuele aanbod op: nieuwe advertenties toevoegen, vraagprijzen bijwerken, en verdwenen advertenties markeren als "verkocht?".</p>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">Maanddoel</div>
+    <div class="card pad">
+      <label for="goal-input">Omzetdoel per maand</label>
+      <div class="input-prefix"><span>€</span><input type="number" id="goal-input" placeholder="0" step="1" min="0" inputmode="decimal"></div>
+      <p style="font-size:0.74rem;color:var(--muted);margin:8px 0 0">Verschijnt als voortgangsbalk bovenaan de statistieken. Leeg = uit.</p>
+    </div>
+
+    <div class="section-title" style="margin-top:18px">Data</div>
     <div class="card pad stack">
       <button class="btn btn-ghost" id="export-json">⬇️ Backup downloaden (JSON)</button>
       <button class="btn btn-ghost" id="export-csv">📊 Exporteer als CSV</button>
@@ -246,6 +362,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="app.js"></script>
+<script src="app.js?v=6"></script>
 </body>
 </html>

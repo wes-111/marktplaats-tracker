@@ -22,4 +22,8 @@ return [
 
     // Naam van de sessiecookie (mag je laten staan).
     'session_name' => 'mp_tracker_sess',
+
+    // --- Marktplaats-sync ---
+    // Je verkoper-id, te vinden in je profiel-URL: marktplaats.nl/u/<naam>/<id>/
+    'mp_seller_id' => '',
 ];
